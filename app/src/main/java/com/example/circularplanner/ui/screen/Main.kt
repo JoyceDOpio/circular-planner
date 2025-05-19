@@ -80,9 +80,17 @@ fun MainScreen(
         newTaskEndTime = time
     }
 
-    fun removeTask(id: UUID) {
+//    fun removeTask(id: UUID) {
+//        val condition = Predicate<Task> {
+//            it.id == id
+//        }
+//
+//        tasks.removeIf(condition)
+//    }
+
+    fun removeTask(task: Task) {
         val condition = Predicate<Task> {
-            it.id == id
+            it.id == task.id
         }
 
         tasks.removeIf(condition)

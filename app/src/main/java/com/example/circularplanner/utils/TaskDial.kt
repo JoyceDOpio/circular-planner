@@ -78,7 +78,8 @@ fun TaskDial(
     tasks: List<Task>,
     setNewTaskStartTime: (Time) -> Unit,
     setNewTaskEndTime: (Time) -> Unit,
-    removeTask: (UUID) -> Unit
+//    removeTask: (UUID) -> Unit
+//    removeTask: (Task) -> Unit
 ) {
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

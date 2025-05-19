@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,13 +27,14 @@ import java.util.UUID
 
 @Composable
 fun TaskListItem(
+    modifier: Modifier = Modifier,
     viewModel: DataViewModel,
     onNavigateToTaskEdit: () -> Unit,
     taskId: UUID,
-    modifier: Modifier = Modifier,
     getTask: (UUID) -> Task?,
-    removeTask: (UUID) -> Unit,
-) {
+//    removeTask: (UUID) -> Unit,
+    removeTask: (Task) -> Unit,
+){
     val task = getTask(taskId)
 
     Card(
@@ -41,8 +43,9 @@ fun TaskListItem(
                 viewModel.setTaskId(taskId)
                 onNavigateToTaskEdit()
             }
-            .padding(8.dp)
-            .fillMaxWidth(),
+//            .padding(8.dp)
+//            .fillMaxWidth(),
+            .fillMaxSize(),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
         ),
