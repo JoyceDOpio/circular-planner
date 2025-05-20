@@ -139,8 +139,8 @@ fun MainScreen(
                 onNavigateToTaskDisplay = {
                     navController.navigate(route = TaskDisplay)
                 },
-                startTime = newTaskStartTime,
-                endTime = newTaskEndTime,
+//                startTime = newTaskStartTime,
+//                endTime = newTaskEndTime,
                 addTask = ::addTask,
                 getTask = ::getTask,
                 updateTask = ::updateTask

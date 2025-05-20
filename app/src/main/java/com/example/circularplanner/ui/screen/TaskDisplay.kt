@@ -112,9 +112,10 @@ fun TaskDisplayScreen(
                 ) {
                     TaskDial(
                         viewModel = viewModel,
-                        tasks = tasks,
-                        setNewTaskStartTime = setNewTaskStartTime,
-                        setNewTaskEndTime = setNewTaskEndTime,
+                        onNavigateToTaskEdit = onNavigateToTaskEdit,
+                        tasks = tasks
+//                        setNewTaskStartTime = setNewTaskStartTime,
+//                        setNewTaskEndTime = setNewTaskEndTime,
 //                        removeTask = removeTask
                     )
                 }

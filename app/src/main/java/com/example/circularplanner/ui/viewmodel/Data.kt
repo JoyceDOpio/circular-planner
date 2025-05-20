@@ -11,7 +11,9 @@ import java.util.UUID
 data class DataUiState (
     val activeTimeStart: Time? = null,
     val activeTimeEnd: Time? = null,
-    val taskId: UUID? = null
+    val taskId: UUID? = null,
+    val taskStartTime: Time? = null,
+    val taskEndTime: Time? = null,
 )
 
 class DataViewModel : ViewModel() {
@@ -35,12 +37,30 @@ class DataViewModel : ViewModel() {
         }
     }
 
+    fun setTaskEndTime(time: Time) {
+        _uiState.update {
+                currentState -> currentState.copy(
+            taskEndTime = time
+        )
+        }
+    }
+
+    fun setTaskStartTime(time: Time) {
+        _uiState.update {
+                currentState -> currentState.copy(
+            taskStartTime = time
+        )
+        }
+    }
 
     fun reset() {
         _uiState.update {
                 currentState -> currentState.copy(
             activeTimeStart = null,
-            activeTimeEnd = null
+            activeTimeEnd = null,
+            taskId = null,
+            taskStartTime = null,
+            taskEndTime = null
         )
         }
     }

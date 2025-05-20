@@ -47,8 +47,8 @@ object TaskEdit
 fun TaskEditScreen(
     viewModel: DataViewModel,
     onNavigateToTaskDisplay: () -> Unit,
-    startTime: Time = Time(LocalDateTime.now().hour, LocalDateTime.now().minute),
-    endTime: Time = Time(LocalDateTime.now().hour + 60, LocalDateTime.now().minute),
+//    startTime: Time = Time(LocalDateTime.now().hour, LocalDateTime.now().minute),
+//    endTime: Time = Time(LocalDateTime.now().hour + 60, LocalDateTime.now().minute),
     addTask: (String, Time, Time, String) -> Unit,
     getTask: (UUID) -> Task?,
     updateTask: (UUID, String, Time, Time, String) -> Unit
@@ -86,12 +86,12 @@ fun TaskEditScreen(
         )
     } else {
         startTimePickerState = rememberTimePickerState(
-            initialHour = startTime.hour!!,
-            initialMinute = startTime.minute!!
+            initialHour = uiState.taskStartTime?.hour!!,
+            initialMinute = uiState.taskStartTime?.minute!!
         )
         endTimePickerState = rememberTimePickerState(
-            initialHour = endTime.hour!!,
-            initialMinute = endTime.minute!!
+            initialHour = uiState.taskEndTime?.hour!!,
+            initialMinute = uiState.taskEndTime?.minute!!
         )
     }
 
