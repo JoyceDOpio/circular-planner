@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.circularplanner.data.Task
 import com.example.circularplanner.data.Time
+import com.example.circularplanner.ui.state.TaskState
 import com.example.circularplanner.ui.viewmodel.DataViewModel
 import java.util.UUID
 import kotlin.math.floor
@@ -43,7 +44,8 @@ object TaskDisplay
 @Composable
 fun TaskDisplayScreen(
 //    modifier: Modifier = Modifier,
-    viewModel: DataViewModel,
+//    viewModel: DataViewModel,
+    taskState: TaskState,
     onNavigateToTaskEdit: () -> Unit,
     tasks: List<Task>,
     setNewTaskStartTime: (Time) -> Unit,
@@ -91,7 +93,8 @@ fun TaskDisplayScreen(
     ) {
         Column {
             MainAppBar(
-                viewModel = viewModel,
+//                viewModel = viewModel,
+                taskState = taskState,
                 onNavigateToTaskEdit = onNavigateToTaskEdit,
                 isList = isList,
                 onLayoutChangeRequested = { isList = !isList },
@@ -111,7 +114,8 @@ fun TaskDisplayScreen(
                     exit = fadeOut(),
                 ) {
                     TaskDial(
-                        viewModel = viewModel,
+//                        viewModel = viewModel,
+                        taskState = taskState,
                         onNavigateToTaskEdit = onNavigateToTaskEdit,
                         tasks = tasks
 //                        setNewTaskStartTime = setNewTaskStartTime,
@@ -126,7 +130,8 @@ fun TaskDisplayScreen(
                     exit = fadeOut(),
                 ) {
                     TaskList (
-                        viewModel = viewModel,
+//                        viewModel = viewModel,
+                        taskState = taskState,
                         onNavigateToTaskEdit = onNavigateToTaskEdit,
                         tasks = tasks,
                         getTask = getTask,
@@ -142,9 +147,9 @@ fun TaskDisplayScreen(
                     .padding(15.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                val startTime = uiState.activeTimeStart
-                val endTime = uiState.activeTimeEnd
+//                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                val startTime = taskState.activeTimeStart
+                val endTime = taskState.activeTimeEnd
 
                 Text (text = "Active Time: ${formatTime(calculateTimeIntervalInMinutes(startTime, endTime))}", fontWeight = FontWeight.Bold)
             }

@@ -13,12 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.example.circularplanner.R
+import com.example.circularplanner.ui.state.TaskState
 import com.example.circularplanner.ui.viewmodel.DataViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainAppBar(
-    viewModel: DataViewModel,
+//    viewModel: DataViewModel,
+    taskState: TaskState,
     onNavigateToTaskEdit: () -> Unit,
     isList: Boolean,
     onLayoutChangeRequested: () -> Unit,
@@ -29,7 +31,8 @@ fun MainAppBar(
         actions = {
             IconButton(
                 onClick = {
-                    viewModel.setTaskId(null)
+//                    viewModel.setTaskId(null)
+                    taskState.taskId = null
                     onNavigateToTaskEdit()
                 }
             ) {

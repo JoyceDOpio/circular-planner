@@ -33,6 +33,7 @@ import com.example.circularplanner.ui.viewmodel.DataViewModel
 import kotlinx.serialization.Serializable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.circularplanner.data.Time
+import com.example.circularplanner.ui.state.TaskState
 
 @Serializable
 object ActiveTimeSetUp
@@ -40,7 +41,9 @@ object ActiveTimeSetUp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActiveTimeSetUpScreen (
-    viewModel: DataViewModel = viewModel(),
+//    viewModel: DataViewModel = viewModel(),
+    taskState: TaskState,
+    modifier: Modifier = Modifier,
     onNavigateToTaskDisplay: () -> Unit
 ){
     var startActiveTimePickerState = rememberTimePickerState()
@@ -71,100 +74,117 @@ fun ActiveTimeSetUpScreen (
         return false
     }
 
-    Column(){
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(10.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ){
+        Column(
+            modifier = modifier
+//                .fillMaxSize()
+                .padding(vertical = 20.dp),
+            verticalArrangement = Arrangement.SpaceAround,
+//            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
-                horizontalArrangement = Arrangement.Start,
-            )
-            {
-                IconButton(onClick = {
-                    //TODO: open info popup
-                }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.info_27dp_5f6368_fill0_wght400_grad0_opsz24),
-                        contentDescription = stringResource(id = R.string.info_content_desc),
-    //                        modifier = Modifier.fillMaxSize(0.25F)
-                    )
-                }
-
-                ActiveTimePicker(
-                    startActiveTimePickerState,
-                    ActiveTime.START
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+//                .weight(1f),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {
-                    showTimePicker = true
-                    showStartActiveTimePicker = true
-                }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.schedule_24dp_5f6368_fill0_wght400_grad0_opsz24),
-                        contentDescription = "Open active time start setter",
-                        modifier = Modifier.fillMaxSize(0.8f)
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                )
+                {
+                    IconButton(onClick = {
+                        //TODO: open info popup
+                    }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.info_27dp_5f6368_fill0_wght400_grad0_opsz24),
+                            contentDescription = stringResource(id = R.string.info_content_desc),
+                            //                        modifier = Modifier.fillMaxSize(0.25F)
+                        )
+                    }
+
+                    ActiveTimePicker(
+                        startActiveTimePickerState,
+                        ActiveTime.START
                     )
                 }
-            }
 
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.Start,
-
+                Row(
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                IconButton(onClick = {
-                    //TODO: open info popup
-                }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.info_27dp_5f6368_fill0_wght400_grad0_opsz24),
-                        contentDescription = stringResource(id = R.string.info_content_desc),
-    //                        modifier = Modifier.fillMaxSize(0.25F)
-                    )
+                    IconButton(onClick = {
+                        showTimePicker = true
+                        showStartActiveTimePicker = true
+                    }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.schedule_24dp_5f6368_fill0_wght400_grad0_opsz24),
+                            contentDescription = "Open active time start setter",
+                            modifier = Modifier.fillMaxSize(0.8f)
+                        )
+                    }
                 }
 
-                ActiveTimePicker(
-                    endActiveTimePickerState,
-                    ActiveTime.END
-                )
             }
 
             Row(
-                horizontalArrangement = Arrangement.SpaceAround,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(5.dp),
+//                .weight(1f),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = {
-                    showTimePicker = true
-                }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.schedule_24dp_5f6368_fill0_wght400_grad0_opsz24),
-                        contentDescription = "Open active time end setter",
-                        modifier = Modifier.fillMaxSize(0.8F)
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+
+                    ) {
+                    IconButton(onClick = {
+                        //TODO: open info popup
+                    }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.info_27dp_5f6368_fill0_wght400_grad0_opsz24),
+                            contentDescription = stringResource(id = R.string.info_content_desc),
+                            //                        modifier = Modifier.fillMaxSize(0.25F)
+                        )
+                    }
+
+                    ActiveTimePicker(
+                        endActiveTimePickerState,
+                        ActiveTime.END
                     )
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+                        showTimePicker = true
+                    }) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.schedule_24dp_5f6368_fill0_wght400_grad0_opsz24),
+                            contentDescription = "Open active time end setter",
+                            modifier = Modifier.fillMaxSize(0.8F)
+                        )
+                    }
                 }
             }
         }
 
         Row(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .padding(5.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+//                .weight(1f),
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
 
         ) {
@@ -174,7 +194,9 @@ fun ActiveTimeSetUpScreen (
                 val isActiveTimeValid = validateActiveTime(startTime, endTime)
 
                 if(isActiveTimeValid) {
-                    viewModel.setActiveTime(startTime, endTime)
+//                    viewModel.setActiveTime(startTime, endTime)
+                    taskState.activeTimeStart = startTime
+                    taskState.activeTimeEnd = endTime
                     onNavigateToTaskDisplay()
                 } else {
                     //TODO: Display notification about invalid input

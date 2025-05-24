@@ -22,13 +22,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.circularplanner.data.Task
+import com.example.circularplanner.ui.state.TaskState
 import com.example.circularplanner.ui.viewmodel.DataViewModel
 import java.util.UUID
 
 @Composable
 fun TaskListItem(
     modifier: Modifier = Modifier,
-    viewModel: DataViewModel,
+//    viewModel: DataViewModel,
+    taskState: TaskState,
     onNavigateToTaskEdit: () -> Unit,
     taskId: UUID,
     getTask: (UUID) -> Task?,
@@ -40,7 +42,8 @@ fun TaskListItem(
     Card(
         modifier = modifier
             .clickable {
-                viewModel.setTaskId(taskId)
+//                viewModel.setTaskId(taskId)
+                taskState.taskId = taskId
                 onNavigateToTaskEdit()
             }
 //            .padding(8.dp)

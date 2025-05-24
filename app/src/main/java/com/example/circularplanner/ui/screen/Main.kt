@@ -13,6 +13,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.circularplanner.data.Task
 import com.example.circularplanner.data.Time
+import com.example.circularplanner.ui.state.TaskState
+import com.example.circularplanner.ui.state.rememberTaskState
 import com.example.circularplanner.ui.viewmodel.DataViewModel
 import java.util.UUID
 import java.util.function.Predicate
@@ -24,6 +26,7 @@ fun MainScreen(
 ) {
     val navController = rememberNavController()
     val dataViewModel: DataViewModel = viewModel()
+    val taskState = rememberTaskState()
 
     var tasks = remember { mutableStateListOf<Task>()}
 //    var tasks = remember { mutableStateListOf(
@@ -109,7 +112,8 @@ fun MainScreen(
     ) {
         composable<ActiveTimeSetUp> {
             ActiveTimeSetUpScreen(
-                viewModel = dataViewModel,
+//                viewModel = dataViewModel,
+                taskState = taskState,
                 onNavigateToTaskDisplay = {
                     navController.navigate(route = TaskDisplay)
                 }
@@ -118,7 +122,8 @@ fun MainScreen(
 
         composable<TaskDisplay> {
             TaskDisplayScreen(
-                viewModel = dataViewModel,
+//                viewModel = dataViewModel,
+                taskState = taskState,
                 onNavigateToTaskEdit = {
                     navController.navigate(route = TaskEdit)
                 },
@@ -135,7 +140,8 @@ fun MainScreen(
 
         composable<TaskEdit> {
             TaskEditScreen(
-                viewModel = dataViewModel,
+//                viewModel = dataViewModel,
+                taskState = taskState,
                 onNavigateToTaskDisplay = {
                     navController.navigate(route = TaskDisplay)
                 },

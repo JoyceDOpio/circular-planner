@@ -1,5 +1,6 @@
 package com.example.circularplanner.ui.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -34,6 +37,7 @@ import com.example.circularplanner.R
 import com.example.circularplanner.data.Task
 import com.example.circularplanner.data.Time
 import com.example.circularplanner.ui.common.TimePickerDialog
+import com.example.circularplanner.ui.state.TaskState
 import com.example.circularplanner.ui.viewmodel.DataViewModel
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
@@ -45,7 +49,9 @@ object TaskEdit
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskEditScreen(
-    viewModel: DataViewModel,
+    modifier: Modifier = Modifier,
+//    viewModel: DataViewModel,
+    taskState: TaskState,
     onNavigateToTaskDisplay: () -> Unit,
 //    startTime: Time = Time(LocalDateTime.now().hour, LocalDateTime.now().minute),
 //    endTime: Time = Time(LocalDateTime.now().hour + 60, LocalDateTime.now().minute),
@@ -61,9 +67,9 @@ fun TaskEditScreen(
         return "Edit task"
     }
 
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+//    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val taskId = uiState.taskId
+    val taskId = taskState.taskId
     var label: String = getLabel(taskId)
     var task: Task? = null
 
@@ -86,12 +92,12 @@ fun TaskEditScreen(
         )
     } else {
         startTimePickerState = rememberTimePickerState(
-            initialHour = uiState.taskStartTime?.hour!!,
-            initialMinute = uiState.taskStartTime?.minute!!
+            initialHour = taskState.taskStartTime.hour,
+            initialMinute = taskState.taskStartTime.minute
         )
         endTimePickerState = rememberTimePickerState(
-            initialHour = uiState.taskEndTime?.hour!!,
-            initialMinute = uiState.taskEndTime?.minute!!
+            initialHour = taskState.taskEndTime.hour,
+            initialMinute = taskState.taskEndTime.minute
         )
     }
 
@@ -99,6 +105,14 @@ fun TaskEditScreen(
     var description by remember { mutableStateOf(task?.description ?: "") }
 
     fun closeTimePicker() {
+//        viewModel.setTaskStartTime(Time(startTimePickerState.hour, startTimePickerState.minute))
+//        viewModel.setTaskEndTime(Time(endTimePickerState.hour, endTimePickerState.minute))
+        //TODO: Validate if task start- and end time are within active time bounds
+        taskState.taskStartTime = Time(startTimePickerState.hour, startTimePickerState.minute)
+        taskState.taskEndTime = Time(endTimePickerState.hour, endTimePickerState.minute)
+//        Log.i("startTimePickerState: ", String.format("%d:%02d", startTimePickerState.hour, startTimePickerState.minute))
+//        Log.i("endTimePickerState: ", String.format("%d:%02d", startTimePickerState.hour, startTimePickerState.minute))
+
         showTimePicker = false
         showStartTimePicker = false
     }
@@ -108,52 +122,24 @@ fun TaskEditScreen(
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(10.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column () {
             Row (
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
                     .padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(label, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-
-                Row () {
-                    IconButton(onClick = {
-                        //TODO: Validate start- and end-time input - the values should not overlap with other tasks and should remain within the active time boundaries
-                        if (taskId != null) {
-                            updateTask(taskId, title, Time(startTimePickerState.hour, startTimePickerState.minute), Time(endTimePickerState.hour, endTimePickerState.minute), description)
-                        } else {
-                            addTask(title, Time(startTimePickerState.hour, startTimePickerState.minute), Time(endTimePickerState.hour, endTimePickerState.minute), description)
-                        }
-
-                        onNavigateToTaskDisplay()
-                    }) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.save_24dp_5f6368_fill0_wght400_grad0_opsz24),
-                            contentDescription = "Save task",
-                            modifier = Modifier.fillMaxSize(0.8F)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = onNavigateToTaskDisplay
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.cancel_24dp_5f6368_fill0_wght400_grad0_opsz24),
-                            contentDescription = "Cancel",
-                            modifier = Modifier.fillMaxSize(0.8F)
-                        )
-                    }
-                }
             }
+
             Row (
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
                     .padding(10.dp),
 //                horizontalArrangement = Arrangement.SpaceAround,
@@ -173,7 +159,7 @@ fun TaskEditScreen(
             }
 
             Row (
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
                     .padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -181,9 +167,10 @@ fun TaskEditScreen(
             ) {
                 // Start time
                 Text(
-                    text = String.format("Start time: %d:%02d", startTimePickerState.hour, startTimePickerState.minute),
+                    text = String.format("Start time: %d:%02d", taskState.taskStartTime?.hour, taskState.taskStartTime?.minute),
                     fontWeight = FontWeight.Bold
                 )
+
                 IconButton(onClick = {
                     showStartTimePicker = true
                     openTimePicker()
@@ -197,7 +184,7 @@ fun TaskEditScreen(
             }
 
             Row (
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxWidth()
                     .padding(10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -205,7 +192,7 @@ fun TaskEditScreen(
             ) {
                 // End time
                 Text(
-                    text = String.format("End time: %d:%02d", endTimePickerState.hour, endTimePickerState.minute),
+                    text = String.format("End time: %d:%02d", taskState.taskEndTime.hour, taskState.taskEndTime.minute),
                     fontWeight = FontWeight.Bold
                 )
                 IconButton(onClick = {
@@ -237,6 +224,43 @@ fun TaskEditScreen(
                         .fillMaxHeight(0.5f),
                     textStyle = TextStyle(fontSize = 18.sp)
                 )
+            }
+
+            Row (
+                modifier = modifier
+                    .fillMaxWidth(),
+//                    .padding(10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FilledTonalButton(
+                    onClick = onNavigateToTaskDisplay,
+                    modifier = modifier
+//                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(5.dp)
+                ) {
+                    Text(text = "Cancel")
+                }
+
+                Button(
+                    onClick = {
+                        //TODO: Validate start- and end-time input - the values should remain within the active time boundaries
+                        if (taskId != null) {
+                            updateTask(taskId, title, Time(startTimePickerState.hour, startTimePickerState.minute), Time(endTimePickerState.hour, endTimePickerState.minute), description)
+                        } else {
+                            addTask(title, Time(startTimePickerState.hour, startTimePickerState.minute), Time(endTimePickerState.hour, endTimePickerState.minute), description)
+                        }
+
+                        onNavigateToTaskDisplay()
+                    },
+                    modifier = modifier
+//                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(5.dp)
+                ) {
+                    Text(text = "Save")
+                }
             }
         }
 

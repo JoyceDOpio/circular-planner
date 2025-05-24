@@ -14,12 +14,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.circularplanner.data.Task
+import com.example.circularplanner.ui.state.TaskState
 import com.example.circularplanner.ui.viewmodel.DataViewModel
 import java.util.UUID
 
 @Composable
 fun TaskList(
-    viewModel: DataViewModel,
+//    viewModel: DataViewModel,
+    taskState: TaskState,
     onNavigateToTaskEdit: () -> Unit,
     tasks: List<Task>,
     getTask: (UUID) -> Task?,
@@ -51,7 +53,8 @@ fun TaskList(
 //                        .padding(16.dp)
 //                )
                 task -> TaskListItem(
-                    viewModel = viewModel,
+//                    viewModel = viewModel,
+                    taskState = taskState,
                     onNavigateToTaskEdit = onNavigateToTaskEdit,
                     taskId = task.id,
                     getTask = getTask,

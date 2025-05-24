@@ -42,9 +42,6 @@ fun <T> SwipeToDeleteContainer(
 //    viewModel: DataViewModel,
     modifier: Modifier = Modifier,
     item: T,
-//    firstContent: @Composable (modifier: Modifier) -> Unit,
-//    secondContent: @Composable (modifier: Modifier) -> Unit,
-//    offsetSize: Dp
     onDelete: (T) -> Unit,
     animationDuration: Long = 500,
     content: @Composable (T) -> Unit
@@ -117,7 +114,7 @@ fun DeleteBackground(
         modifier = Modifier
             .fillMaxSize()
             .background(color),
-//        contentAlignment = Alignment.CenterStart
+        contentAlignment = Alignment.CenterEnd
     ) {
         Icon(
             imageVector = ImageVector.vectorResource(id = R.drawable.delete_24dp_5f6368_fill0_wght400_grad0_opsz24),

@@ -40,28 +40,28 @@ class DataViewModel : ViewModel() {
     fun setTaskEndTime(time: Time) {
         _uiState.update {
                 currentState -> currentState.copy(
-            taskEndTime = time
-        )
+                taskEndTime = time
+            )
         }
     }
 
     fun setTaskStartTime(time: Time) {
         _uiState.update {
                 currentState -> currentState.copy(
-            taskStartTime = time
-        )
+                taskStartTime = time
+            )
         }
     }
 
     fun reset() {
         _uiState.update {
-                currentState -> currentState.copy(
-            activeTimeStart = null,
-            activeTimeEnd = null,
-            taskId = null,
-            taskStartTime = null,
-            taskEndTime = null
-        )
+            currentState -> currentState.copy(
+                activeTimeStart = null,
+                activeTimeEnd = null,
+                taskId = null,
+                taskStartTime = null,
+                taskEndTime = null
+            )
         }
     }
 }
