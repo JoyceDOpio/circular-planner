@@ -47,9 +47,10 @@ fun TaskDisplayScreen(
 //    viewModel: DataViewModel,
     taskState: TaskState,
     onNavigateToTaskEdit: () -> Unit,
+    onNavigateToTaskInfo: () -> Unit,
     tasks: List<Task>,
-    setNewTaskStartTime: (Time) -> Unit,
-    setNewTaskEndTime: (Time) -> Unit,
+//    setNewTaskStartTime: (Time) -> Unit,
+//    setNewTaskEndTime: (Time) -> Unit,
     getTask: (UUID) -> Task?,
 //    removeTask: (UUID) -> Unit
     removeTask: (Task) -> Unit
@@ -94,6 +95,7 @@ fun TaskDisplayScreen(
         Column {
             MainAppBar(
 //                viewModel = viewModel,
+//                modifier = Modifier,
                 taskState = taskState,
                 onNavigateToTaskEdit = onNavigateToTaskEdit,
                 isList = isList,
@@ -117,6 +119,7 @@ fun TaskDisplayScreen(
 //                        viewModel = viewModel,
                         taskState = taskState,
                         onNavigateToTaskEdit = onNavigateToTaskEdit,
+                        onNavigateToTaskInfo = onNavigateToTaskInfo,
                         tasks = tasks
 //                        setNewTaskStartTime = setNewTaskStartTime,
 //                        setNewTaskEndTime = setNewTaskEndTime,
@@ -132,7 +135,7 @@ fun TaskDisplayScreen(
                     TaskList (
 //                        viewModel = viewModel,
                         taskState = taskState,
-                        onNavigateToTaskEdit = onNavigateToTaskEdit,
+                        onNavigateToTaskInfo = onNavigateToTaskInfo,
                         tasks = tasks,
                         getTask = getTask,
                         removeTask = removeTask
@@ -155,19 +158,4 @@ fun TaskDisplayScreen(
             }
         }
     }
-
-//    if (openAlertDialog) {
-//        PopupDialog(
-//            onDismissRequest = { openAlertDialog = false },
-//            content = {
-//                Text(
-//                    text = "This is a minimal dialog",
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .wrapContentSize(Alignment.Center),
-//                    textAlign = TextAlign.Center,
-//                )
-//            }
-//        )
-//    }
 }

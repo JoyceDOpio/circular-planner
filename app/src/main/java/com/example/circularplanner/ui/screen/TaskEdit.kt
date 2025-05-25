@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -30,6 +32,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,7 +60,9 @@ fun TaskEditScreen(
 //    endTime: Time = Time(LocalDateTime.now().hour + 60, LocalDateTime.now().minute),
     addTask: (String, Time, Time, String) -> Unit,
     getTask: (UUID) -> Task?,
-    updateTask: (UUID, String, Time, Time, String) -> Unit
+    updateTask: (UUID, String, Time, Time, String) -> Unit,
+//    calculateAngle: () -> Unit,
+//    calculateTaskDuration: (Time, Time) -> Unit
 ) {
     fun getLabel(taskId: UUID?): String {
         if (taskId == null) {
@@ -123,172 +128,179 @@ fun TaskEditScreen(
 
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .padding(10.dp),
-        verticalArrangement = Arrangement.SpaceBetween
+            .padding(10.dp)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column () {
-            Row (
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(label, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-            }
 
-            Row (
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-//                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Title field
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { text: String ->
-                        title = text
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    label = { Text("Title") },
-                    textStyle = TextStyle(fontSize = 20.sp)
+        Row (
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(label, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        }
+
+        Row (
+            modifier = modifier
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Title field
+            OutlinedTextField(
+                value = title,
+                onValueChange = { text: String ->
+                    title = text
+                },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(fontSize = 20.sp),
+                label = { Text("Title") },
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                singleLine = true
+            )
+        }
+
+        Row (
+            modifier = modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Start time
+            Text(
+                text = String.format("Start time: %d:%02d", taskState.taskStartTime?.hour, taskState.taskStartTime?.minute),
+                fontWeight = FontWeight.Bold
+            )
+
+            IconButton(onClick = {
+                showStartTimePicker = true
+                openTimePicker()
+            }) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.schedule_24dp_5f6368_fill0_wght400_grad0_opsz24),
+                    contentDescription = "Open time picker",
+                    modifier = Modifier.fillMaxSize(0.8F)
                 )
-            }
-
-            Row (
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Start time
-                Text(
-                    text = String.format("Start time: %d:%02d", taskState.taskStartTime?.hour, taskState.taskStartTime?.minute),
-                    fontWeight = FontWeight.Bold
-                )
-
-                IconButton(onClick = {
-                    showStartTimePicker = true
-                    openTimePicker()
-                }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.schedule_24dp_5f6368_fill0_wght400_grad0_opsz24),
-                        contentDescription = "Open time picker",
-                        modifier = Modifier.fillMaxSize(0.8F)
-                    )
-                }
-            }
-
-            Row (
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // End time
-                Text(
-                    text = String.format("End time: %d:%02d", taskState.taskEndTime.hour, taskState.taskEndTime.minute),
-                    fontWeight = FontWeight.Bold
-                )
-                IconButton(onClick = {
-                    openTimePicker()
-                }) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.schedule_24dp_5f6368_fill0_wght400_grad0_opsz24),
-                        contentDescription = "Open time picker",
-                        modifier = Modifier.fillMaxSize(0.8F)
-                    )
-                }
-            }
-
-            Row (
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Description field
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { text: String ->
-                        description = text
-                    },
-                    singleLine = false,
-                    label = { Text("Description") },
-                    modifier = Modifier
-                        .padding(10.dp)
-                        .fillMaxWidth()
-                        .fillMaxHeight(0.5f),
-                    textStyle = TextStyle(fontSize = 18.sp)
-                )
-            }
-
-            Row (
-                modifier = modifier
-                    .fillMaxWidth(),
-//                    .padding(10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                FilledTonalButton(
-                    onClick = onNavigateToTaskDisplay,
-                    modifier = modifier
-//                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(5.dp)
-                ) {
-                    Text(text = "Cancel")
-                }
-
-                Button(
-                    onClick = {
-                        //TODO: Validate start- and end-time input - the values should remain within the active time boundaries
-                        if (taskId != null) {
-                            updateTask(taskId, title, Time(startTimePickerState.hour, startTimePickerState.minute), Time(endTimePickerState.hour, endTimePickerState.minute), description)
-                        } else {
-                            addTask(title, Time(startTimePickerState.hour, startTimePickerState.minute), Time(endTimePickerState.hour, endTimePickerState.minute), description)
-                        }
-
-                        onNavigateToTaskDisplay()
-                    },
-                    modifier = modifier
-//                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(5.dp)
-                ) {
-                    Text(text = "Save")
-                }
             }
         }
 
-        if (showTimePicker) {
-            TimePickerDialog(
-                onDismissRequest = {
-                    closeTimePicker()
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            closeTimePicker()
-                        }
-                    ) { Text("OK") } },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            closeTimePicker()
-                        }
-                    ) { Text("Cancel") }
-                }
+        Row (
+            modifier = modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // End time
+            Text(
+                text = String.format("End time: %d:%02d", taskState.taskEndTime.hour, taskState.taskEndTime.minute),
+                fontWeight = FontWeight.Bold
             )
-            {
-                if (showStartTimePicker) {
-                    TimePicker(state = startTimePickerState)
-                } else {
-                    TimePicker(state = endTimePickerState)
-                }
+            IconButton(onClick = {
+                openTimePicker()
+            }) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.schedule_24dp_5f6368_fill0_wght400_grad0_opsz24),
+                    contentDescription = "Open time picker",
+                    modifier = Modifier.fillMaxSize(0.8F)
+                )
+            }
+        }
+
+        Row (
+            modifier = modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Description field
+            OutlinedTextField(
+                value = description,
+                onValueChange = { text: String ->
+                    description = text
+                },
+                modifier = Modifier
+//                    .padding(10.dp)
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.5f),
+                textStyle = TextStyle(fontSize = 18.sp),
+                label = { Text("Description") },
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                singleLine = false
+            )
+        }
+
+        Row (
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(
+                onClick = onNavigateToTaskDisplay,
+                modifier = modifier.weight(1f),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(text = "Cancel")
+            }
+
+            Button(
+                onClick = {
+                    //TODO: Validate start- and end-time input - the values should remain within the active time boundaries
+                    if (taskId != null) {
+                        updateTask(
+                            taskId,
+                            title,
+                            Time(startTimePickerState.hour, startTimePickerState.minute),
+                            Time(endTimePickerState.hour, endTimePickerState.minute),
+                            description
+                        )
+                    } else {
+                        addTask(
+                            title,
+                            Time(startTimePickerState.hour, startTimePickerState.minute),
+                            Time(endTimePickerState.hour, endTimePickerState.minute),
+                            description
+                        )
+                    }
+
+                    onNavigateToTaskDisplay()
+                },
+                modifier = modifier.weight(1f),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(text = "Save")
+            }
+        }
+    }
+
+    if (showTimePicker) {
+        TimePickerDialog(
+            onDismissRequest = {
+                closeTimePicker()
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        closeTimePicker()
+                    }
+                ) { Text("OK") } },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        closeTimePicker()
+                    }
+                ) { Text("Cancel") }
+            }
+        )
+        {
+            if (showStartTimePicker) {
+                TimePicker(state = startTimePickerState)
+            } else {
+                TimePicker(state = endTimePickerState)
             }
         }
     }

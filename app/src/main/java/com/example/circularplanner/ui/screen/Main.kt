@@ -127,12 +127,15 @@ fun MainScreen(
                 onNavigateToTaskEdit = {
                     navController.navigate(route = TaskEdit)
                 },
+                onNavigateToTaskInfo = {
+                    navController.navigate(route = TaskInfo)
+                },
                 tasks = sortedTasks,
 //                addTask = ::addTask,
 //                startActiveTimePickerState = startActiveTimePickerState,
 //                endActiveTimePickerState = endActiveTimePickerState,
-                setNewTaskStartTime = ::setNewTaskStartTime,
-                setNewTaskEndTime = ::setNewTaskEndTime,
+//                setNewTaskStartTime = ::setNewTaskStartTime,
+//                setNewTaskEndTime = ::setNewTaskEndTime,
                 getTask = ::getTask,
                 removeTask = ::removeTask
             )
@@ -153,5 +156,18 @@ fun MainScreen(
             )
         }
 
+        composable<TaskInfo> {
+            TaskInfoScreen(
+//                viewModel = dataViewModel,
+                taskState = taskState,
+                onCancel = {
+                    navController.navigate(route = TaskDisplay)
+                },
+                onNavigateToTaskEdit = {
+                    navController.navigate(route = TaskEdit)
+                },
+                getTask = ::getTask
+            )
+        }
     }
 }

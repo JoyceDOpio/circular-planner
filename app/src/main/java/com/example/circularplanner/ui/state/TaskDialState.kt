@@ -1,5 +1,6 @@
 package com.example.circularplanner.ui.state
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
@@ -7,9 +8,16 @@ import androidx.compose.ui.geometry.Offset
 import com.example.circularplanner.data.Task
 import com.example.circularplanner.data.Time
 import com.example.circularplanner.utils.DEG_OFFSET
-import com.example.circularplanner.utils.TaskMode
+import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.sqrt
+
+enum class TaskMode {
+    CREATE,
+    EDIT,
+    VIEW,
+    NONE
+}
 
 @Stable
 class TaskDialState (
@@ -36,7 +44,7 @@ class TaskDialState (
 
     // Variables to identify whether the dial was touched within an existing task area
 //    var touchWithinTaskArea: Boolean = false
-    var touchedTask: Task? = null
+    var touchedTaskId: UUID? = null
 //    var changeStartTimeTaskBorder: Boolean = false
 //    var changeEndTimeTaskBorder: Boolean = false
 //
@@ -140,16 +148,16 @@ class TaskDialState (
 
         // TODO: secure null values
         if (numberOfClockHoursBetween > 1) {
-            minutes += (60 - start.minute!!)
+            minutes += (60 - start.minute)
             for (i in 1..(numberOfClockHoursBetween - 1)) {
                 minutes += 60
             }
-            minutes += if (end.minute == 0) 0 else end.minute!!
+            minutes += if (end.minute == 0) 0 else end.minute
         } else if (numberOfClockHoursBetween == 1) {
-            minutes += (60 - start.minute!!)
-            minutes += if (end.minute == 0) 0 else end.minute!!
+            minutes += (60 - start.minute)
+            minutes += if (end.minute == 0) 0 else end.minute
         } else {
-            minutes += (end.minute?.minus(start.minute!!)!!)
+            minutes += (end.minute.minus(start.minute))
         }
 
         return minutes
@@ -172,25 +180,22 @@ class TaskDialState (
     }
 
     fun checkIfTouchWithinTaskArea(angle: Float, tasks: List<Task>): Boolean {
+        // The task stores the appropriate angle values, i.e. values corresponding to how the circle is drawn (the 0 degree starts at the right-hand side (east) of the circle). We want to 'correct' these angles as if 0 degree starts at the top of the circle (north)
+        val angleCorrected = mapAngle270To0Degree(angle)
+        var startAngleCorrected: Float
+        var endAngleCorrected: Float
+
         for (task in tasks) {
-            if (angle in task.startAngle..task.endAngle) {
-                touchedTask = task
+            startAngleCorrected = mapAngle270To0Degree(task.startAngle)
+            endAngleCorrected = mapAngle270To0Degree(task.endAngle)
+
+            if (angleCorrected in startAngleCorrected..endAngleCorrected) {
+                touchedTaskId = task.id
                 return true
             }
         }
 
         return false
-    }
-
-    // Because we want the 0 degree angle to correspond to 270 degree (the north of the circle, and not east). We use this to draw the clock upright
-    fun correctAngle(angle: Float): Float {
-        var correctedAngle: Float = angle + DEG_OFFSET
-
-        if (correctedAngle < 0) {
-            correctedAngle += 360
-        }
-
-        return correctedAngle
     }
 
     fun createClockHoursArray (start: Time, end: Time): Array<Time> {
@@ -213,55 +218,55 @@ class TaskDialState (
         return sqrt((first.x - second.x).square() + (first.y - second.y).square())
     }
 
-    fun decorrectAngle(angle: Float): Float {
-        var correctedAngle: Float = angle - DEG_OFFSET
-
-        if (correctedAngle < 0) {
-            correctedAngle += 360
-        }
-
-        return correctedAngle
-    }
+//    fun deoffsetAngle(angle: Float): Float {
+//        var correctedAngle: Float = angle - DEG_OFFSET
+//
+//        if (correctedAngle < 0) {
+//            correctedAngle += 360
+//        }
+//
+//        return correctedAngle
+//    }
 
     fun Float.square(): Float {
         return this * this
     }
 
-    fun getMinimumAndMaximumAllowedAngleRange(tasks: List<Task>, angle: Float): Pair<Float, Float> {
-        var first = 0f
-        var second = 360f
-        var taskBefore: Task? = null
-        var taskAfter: Task? = null
-
-        if (touchedTask != null) {
-            for (i in 0..tasks.size - 1) {
-                if (tasks[i] == touchedTask) {
-                    if (i > 0) {
-                        taskBefore = tasks[i - 1]
-                        first = taskBefore.endAngle
-                    }
-                    if (i < tasks.size - 1){
-                        taskAfter = tasks [i + 1]
-                        second = taskAfter.startAngle
-                    }
-                    break
-                }
-            }
-        } else {
-            for (task in tasks) {
-                if (angle >= task.endAngle) {
-                    taskBefore = task
-                    first = taskBefore.endAngle
-                } else if (angle <= task.startAngle) {
-                    taskAfter = task
-                    second = taskAfter.startAngle
-                    break
-                }
-            }
-        }
-
-        return Pair(correctAngle(first), correctAngle(second))
-    }
+//    fun getMinimumAndMaximumAllowedAngleRange(tasks: List<Task>, angle: Float): Pair<Float, Float> {
+//        var first = 0f
+//        var second = 360f
+//        var taskBefore: Task? = null
+//        var taskAfter: Task? = null
+//
+//        if (touchedTaskId != null) {
+//            for (i in 0..tasks.size - 1) {
+//                if (tasks[i].id == touchedTaskId) {
+//                    if (i > 0) {
+//                        taskBefore = tasks[i - 1]
+//                        first = taskBefore.endAngle
+//                    }
+//                    if (i < tasks.size - 1){
+//                        taskAfter = tasks [i + 1]
+//                        second = taskAfter.startAngle
+//                    }
+//                    break
+//                }
+//            }
+//        } else {
+//            for (task in tasks) {
+//                if (angle >= task.endAngle) {
+//                    taskBefore = task
+//                    first = taskBefore.endAngle
+//                } else if (angle <= task.startAngle) {
+//                    taskAfter = task
+//                    second = taskAfter.startAngle
+//                    break
+//                }
+//            }
+//        }
+//
+//        return Pair(offsetAngle(first), offsetAngle(second))
+//    }
 
     fun getTouchedTask(angle: Float, tasks: List<Task>): Task? {
         for (task in tasks) {
@@ -271,6 +276,28 @@ class TaskDialState (
         }
 
         return null
+    }
+
+    // We want the 0 degree angle to correspond to 270 degree (the north of the circle, and not east). We use this for example to draw the clock upright. The purpose of this offset is to TURN the circle LEFT (ANTI-CLOCKWISE) by 90 degrees
+    fun offsetAngle(angle: Float): Float {
+        var correctedAngle: Float = angle + DEG_OFFSET
+
+        if (correctedAngle < 0) {
+            correctedAngle += 360
+        }
+
+        return correctedAngle
+    }
+
+    // We want the 0 degree angle to correspond to 270 degree (the north of the circle, and not east). We map an angle to its corresponding value if the circle actually started with 0 degrees at the north of the circle
+    fun mapAngle270To0Degree(angle: Float): Float {
+        var correctedAngle: Float = angle - 270f
+
+        if (correctedAngle < 0) {
+            correctedAngle += 360
+        }
+
+        return correctedAngle
     }
 
     fun sweepAngle(start: Float, end: Float): Float {

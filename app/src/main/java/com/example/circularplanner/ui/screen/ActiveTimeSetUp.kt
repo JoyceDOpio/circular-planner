@@ -6,10 +6,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -21,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -100,15 +105,15 @@ fun ActiveTimeSetUpScreen (
                     horizontalArrangement = Arrangement.Start,
                 )
                 {
-                    IconButton(onClick = {
-                        //TODO: open info popup
-                    }) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.info_27dp_5f6368_fill0_wght400_grad0_opsz24),
-                            contentDescription = stringResource(id = R.string.info_content_desc),
-                            //                        modifier = Modifier.fillMaxSize(0.25F)
-                        )
-                    }
+//                    IconButton(onClick = {
+//                        //TODO: open info popup
+//                    }) {
+//                        Icon(
+//                            imageVector = ImageVector.vectorResource(id = R.drawable.info_27dp_5f6368_fill0_wght400_grad0_opsz24),
+//                            contentDescription = stringResource(id = R.string.info_content_desc),
+//                            //                        modifier = Modifier.fillMaxSize(0.25F)
+//                        )
+//                    }
 
                     ActiveTimePicker(
                         startActiveTimePickerState,
@@ -146,15 +151,15 @@ fun ActiveTimeSetUpScreen (
                     horizontalArrangement = Arrangement.Start,
 
                     ) {
-                    IconButton(onClick = {
-                        //TODO: open info popup
-                    }) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.info_27dp_5f6368_fill0_wght400_grad0_opsz24),
-                            contentDescription = stringResource(id = R.string.info_content_desc),
-                            //                        modifier = Modifier.fillMaxSize(0.25F)
-                        )
-                    }
+//                    IconButton(onClick = {
+//                        //TODO: open info popup
+//                    }) {
+//                        Icon(
+//                            imageVector = ImageVector.vectorResource(id = R.drawable.info_27dp_5f6368_fill0_wght400_grad0_opsz24),
+//                            contentDescription = stringResource(id = R.string.info_content_desc),
+//                            //                        modifier = Modifier.fillMaxSize(0.25F)
+//                        )
+//                    }
 
                     ActiveTimePicker(
                         endActiveTimePickerState,
@@ -188,20 +193,26 @@ fun ActiveTimeSetUpScreen (
             verticalAlignment = Alignment.CenterVertically
 
         ) {
-            Button(onClick = {
-                val startTime = Time(startActiveTimePickerState.hour, startActiveTimePickerState.minute)
-                val endTime = Time(endActiveTimePickerState.hour, endActiveTimePickerState.minute)
-                val isActiveTimeValid = validateActiveTime(startTime, endTime)
+            Button(
+                onClick = {
+                    val startTime = Time(startActiveTimePickerState.hour, startActiveTimePickerState.minute)
+                    val endTime = Time(endActiveTimePickerState.hour, endActiveTimePickerState.minute)
+                    val isActiveTimeValid = validateActiveTime(startTime, endTime)
 
-                if(isActiveTimeValid) {
-//                    viewModel.setActiveTime(startTime, endTime)
-                    taskState.activeTimeStart = startTime
-                    taskState.activeTimeEnd = endTime
-                    onNavigateToTaskDisplay()
-                } else {
-                    //TODO: Display notification about invalid input
-                }
-            }) {
+                    if(isActiveTimeValid) {
+    //                    viewModel.setActiveTime(startTime, endTime)
+                        taskState.activeTimeStart = startTime
+                        taskState.activeTimeEnd = endTime
+                        onNavigateToTaskDisplay()
+                    } else {
+                        //TODO: Display notification about invalid input
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+//                shape = Shapes(RectangleShape.createOutline())
+            ) {
                 Text(text = "Calculate active time")
             }
         }

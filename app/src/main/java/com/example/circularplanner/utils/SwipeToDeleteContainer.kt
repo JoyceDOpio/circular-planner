@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -81,8 +82,6 @@ fun <T> SwipeToDeleteContainer(
             state = state,
             backgroundContent = { DeleteBackground(state) },
             modifier = modifier,
-//            modifier = modifier
-//                .height(IntrinsicSize.Min),
             content = { content(item) },
             enableDismissFromStartToEnd = false
         )
@@ -103,42 +102,44 @@ fun DeleteBackground(
 //        }, label = ""
 //    )
     var color = if (swipeDismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart){
-//        Color(0xFFCC0000)// dark red
         MaterialTheme.colorScheme.error
     } else {
         Color.Transparent
 //        MaterialTheme.colorScheme.inverseSurface
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color),
-        contentAlignment = Alignment.CenterEnd
-    ) {
-        Icon(
-            imageVector = ImageVector.vectorResource(id = R.drawable.delete_24dp_5f6368_fill0_wght400_grad0_opsz24),
-            contentDescription = "Remove task",
-            modifier = Modifier
-                .fillMaxSize(0.5F),
-//                .align(Alignment.CenterEnd)
-//                .padding(16.dp),
-            tint = Color.White
-        )
-    }
-
-//    Row(
+//    Box(
 //        modifier = Modifier
 //            .fillMaxSize()
 //            .background(color),
-//        horizontalArrangement = Arrangement.End,
-//        verticalAlignment = Alignment.CenterVertically
+//        contentAlignment = Alignment.CenterEnd
 //    ) {
 //        Icon(
 //            imageVector = ImageVector.vectorResource(id = R.drawable.delete_24dp_5f6368_fill0_wght400_grad0_opsz24),
 //            contentDescription = "Remove task",
-//            modifier = Modifier.fillMaxSize(0.5F),
+//            modifier = Modifier
+//                .fillMaxSize(0.5F),
+////                .align(Alignment.CenterEnd)
+////                .padding(16.dp),
 //            tint = Color.White
 //        )
 //    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = ImageVector.vectorResource(id = R.drawable.delete_24dp_5f6368_fill0_wght400_grad0_opsz24),
+            contentDescription = "Remove task",
+//            modifier = Modifier
+//                .fillMaxSize(0.5f)
+//                .padding(16.dp),
+            tint = Color.White
+        )
+    }
 }

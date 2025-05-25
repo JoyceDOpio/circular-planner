@@ -20,6 +20,7 @@ import com.example.circularplanner.ui.viewmodel.DataViewModel
 @Composable
 fun MainAppBar(
 //    viewModel: DataViewModel,
+    modifier: Modifier = Modifier,
     taskState: TaskState,
     onNavigateToTaskEdit: () -> Unit,
     isList: Boolean,

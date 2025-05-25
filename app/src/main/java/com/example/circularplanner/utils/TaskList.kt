@@ -22,7 +22,7 @@ import java.util.UUID
 fun TaskList(
 //    viewModel: DataViewModel,
     taskState: TaskState,
-    onNavigateToTaskEdit: () -> Unit,
+    onNavigateToTaskInfo: () -> Unit,
     tasks: List<Task>,
     getTask: (UUID) -> Task?,
     removeTask: (Task) -> Unit
@@ -38,8 +38,8 @@ fun TaskList(
             SwipeToDeleteContainer(
                 modifier = Modifier
                     .padding(
-                        horizontal = 8.dp,
-                        vertical = 4.dp,
+                        horizontal = 6.dp,
+                        vertical = 3.dp,
                     )
                     .clip(RoundedCornerShape(15.dp)),
                 item = task,
@@ -55,7 +55,7 @@ fun TaskList(
                 task -> TaskListItem(
 //                    viewModel = viewModel,
                     taskState = taskState,
-                    onNavigateToTaskEdit = onNavigateToTaskEdit,
+                    onNavigateToTaskInfo = onNavigateToTaskInfo,
                     taskId = task.id,
                     getTask = getTask,
                     removeTask = removeTask,

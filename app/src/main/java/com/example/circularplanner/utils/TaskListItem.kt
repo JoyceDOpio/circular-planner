@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.circularplanner.data.Task
@@ -31,7 +32,7 @@ fun TaskListItem(
     modifier: Modifier = Modifier,
 //    viewModel: DataViewModel,
     taskState: TaskState,
-    onNavigateToTaskEdit: () -> Unit,
+    onNavigateToTaskInfo: () -> Unit,
     taskId: UUID,
     getTask: (UUID) -> Task?,
 //    removeTask: (UUID) -> Unit,
@@ -43,12 +44,9 @@ fun TaskListItem(
         modifier = modifier
             .clickable {
 //                viewModel.setTaskId(taskId)
-                taskState.taskId = taskId
-                onNavigateToTaskEdit()
-            }
-//            .padding(8.dp)
-//            .fillMaxWidth(),
-            .fillMaxSize(),
+                taskState.taskId = taskId//TODO: This has to be moved to the navigation stack entry
+                onNavigateToTaskInfo()
+            },
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
         ),
@@ -62,14 +60,10 @@ fun TaskListItem(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.Top
         ) {
-            Column (
-//                modifier = Modifier.fillMaxWidth(0.28f)
-            ) {
+            Column () {
                 Text(
-                    text = String.format("%d:%02d-%d:%02d", task!!.startTime.hour, task!!.startTime.minute, task!!.endTime.hour, task!!.endTime.minute),
-//                    modifier = Modifier.padding(top = 4.dp),
+                    text = String.format("%d:%02d - %d:%02d", task!!.startTime.hour, task!!.startTime.minute, task!!.endTime.hour, task!!.endTime.minute),
                 )
-
             }
 
             VerticalDivider(
@@ -79,19 +73,16 @@ fun TaskListItem(
                 thickness = 2.dp,
             )
 
-            Column (
-
-            ) {
+            Column () {
                 Text(
                     text = task!!.title,
-//                    modifier = Modifier.padding(end = 16.dp),
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
 
                 Text(
-                    text = task!!.description,
-//                    modifier = Modifier.padding(top = 4.dp),
+                    text = task.description,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
