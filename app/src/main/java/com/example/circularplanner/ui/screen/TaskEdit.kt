@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -60,7 +61,7 @@ fun TaskEditScreen(
 //    endTime: Time = Time(LocalDateTime.now().hour + 60, LocalDateTime.now().minute),
     addTask: (String, Time, Time, String) -> Unit,
     getTask: (UUID) -> Task?,
-    updateTask: (UUID, String, Time, Time, String) -> Unit,
+//    updateTask: (UUID, String, Time, Time, String, Float?, Float?, Int?) -> Unit,
 //    calculateAngle: () -> Unit,
 //    calculateTaskDuration: (Time, Time) -> Unit
 ) {
@@ -137,7 +138,7 @@ fun TaskEditScreen(
         Row (
             modifier = modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp),
+                .paddingFromBaseline(top = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -235,7 +236,7 @@ fun TaskEditScreen(
         Row (
             modifier = modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp),
+                .paddingFromBaseline(top = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -251,13 +252,19 @@ fun TaskEditScreen(
                 onClick = {
                     //TODO: Validate start- and end-time input - the values should remain within the active time boundaries
                     if (taskId != null) {
-                        updateTask(
-                            taskId,
-                            title,
-                            Time(startTimePickerState.hour, startTimePickerState.minute),
-                            Time(endTimePickerState.hour, endTimePickerState.minute),
-                            description
-                        )
+                        if (task != null) {
+                            task.title = title
+                            task.startTime = Time(startTimePickerState.hour, startTimePickerState.minute)
+                            task.endTime = Time(endTimePickerState.hour, endTimePickerState.minute)
+                            task.description = description
+                        }
+//                        updateTask(
+//                            taskId,
+//                            title,
+//                            Time(startTimePickerState.hour, startTimePickerState.minute),
+//                            Time(endTimePickerState.hour, endTimePickerState.minute),
+//                            description
+//                        )
                     } else {
                         addTask(
                             title,

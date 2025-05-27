@@ -40,14 +40,14 @@ fun MainScreen(
 
     var sortedTasks = tasks.sortedWith(object : Comparator <Task> {
         override fun compare (first: Task, second: Task) : Int {
-            if (first.startTime.hour!! < second.startTime.hour!!) {
+            if (first.startTime.hour < second.startTime.hour) {
                 return -1
-            } else if (first.startTime.hour!! > second.startTime.hour!!) {
+            } else if (first.startTime.hour > second.startTime.hour) {
                 return 1
             } else {
-                if (first.startTime.minute!! < second.startTime.minute!!) {
+                if (first.startTime.minute < second.startTime.minute) {
                     return -1
-                } else if (first.startTime.minute!! > second.startTime.minute!!) {
+                } else if (first.startTime.minute > second.startTime.minute) {
                     return 1
                 } else {
                     return 0
@@ -71,8 +71,12 @@ fun MainScreen(
         tasks.add(newTask)
     }
 
-    fun getTask(id: UUID): Task? {
-        return tasks.find { task: Task -> task.id == id }
+    fun getTask(id: UUID?): Task? {
+        if (id != null) {
+            return tasks.find { task: Task -> task.id == id }
+        }
+
+        return null
     }
 
     fun setNewTaskStartTime(time: Time) {
@@ -99,11 +103,24 @@ fun MainScreen(
         tasks.removeIf(condition)
     }
 
-    fun updateTask(id: UUID, title: String, startTime: Time, endTime: Time, description: String) {
-        tasks.find { it.id == id }?.title = title
-        tasks.find { it.id == id }?.startTime = startTime
-        tasks.find { it.id == id }?.endTime = endTime
-        tasks.find { it.id == id }?.description = description
+    fun updateTask(
+        id: UUID,
+        title: String,
+        startTime: Time,
+        endTime: Time,
+        description: String,
+        startAngle: Float?,
+        endAngle: Float?,
+        durationInMinutes: Int?
+    ) {
+        var task = tasks.find { it.id == id }
+
+        if (task != null) {
+            task.title = title
+            task.startTime = startTime
+            task.endTime = endTime
+            task.description = description
+        }
     }
 
     NavHost(
@@ -137,7 +154,8 @@ fun MainScreen(
 //                setNewTaskStartTime = ::setNewTaskStartTime,
 //                setNewTaskEndTime = ::setNewTaskEndTime,
                 getTask = ::getTask,
-                removeTask = ::removeTask
+                removeTask = ::removeTask,
+//                updateTask = ::updateTask
             )
         }
 
@@ -152,7 +170,7 @@ fun MainScreen(
 //                endTime = newTaskEndTime,
                 addTask = ::addTask,
                 getTask = ::getTask,
-                updateTask = ::updateTask
+//                updateTask = ::updateTask
             )
         }
 

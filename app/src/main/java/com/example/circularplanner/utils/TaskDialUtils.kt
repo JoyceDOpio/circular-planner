@@ -1,15 +1,8 @@
-package com.example.circularplanner.ui.state
+package com.example.circularplanner.utils
 
-import android.util.Log
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.isTraceInProgress
-import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import com.example.circularplanner.data.Task
 import com.example.circularplanner.data.Time
-import com.example.circularplanner.utils.DEG_OFFSET
-import java.util.UUID
 import kotlin.math.atan2
 import kotlin.math.sqrt
 
@@ -28,43 +21,9 @@ enum class AngleMode {
     END
 }
 
-@Stable
-class TaskDialState (
-    activeTimeStart: Time,
-    activeTimeEnd: Time,
-) {
-    var activeTimeStart: Time = activeTimeStart
-    var activeTimeEnd: Time = activeTimeEnd
-    var taskMode: TaskMode = TaskMode.CREATE
-    var angleMode: AngleMode = AngleMode.NONE
-
-    var totalMinutes: Int = calculateTotalNumberOfMinutes(
-        Time(
-            activeTimeStart.hour,
-            activeTimeStart.minute
-        ),
-        Time(
-            activeTimeEnd.hour,
-            activeTimeEnd.minute
-        )
-    )
-    var minuteAngle: Float = 360 / totalMinutes.toFloat()
-
-    // Variables to identify whether the dial was touched within an existing task area
-//    var touchWithinTaskArea: Boolean = false
-    var touchedTaskId: UUID? = null
-
-//    var changeStartTimeTaskBorder: Boolean = false
-//    var changeEndTimeTaskBorder: Boolean = false
-//
-//    var settingAngle: Boolean = false
-//    var settingNewTask: Boolean = true
-//    var allowedAngleRange: Pair<Float, Float> = Pair(0f,0f)
-//    var dateTime: LocalTime = LocalTime.now()
-//    // Draw a pointer on the dial to illustrate the finger's movement along the dial edge
-//    var drawFingerPointer: Boolean = false
-
-//    var action: Action =  Action.NONE
+object TaskDialUtils {
+    const val DEG_TO_RAD = Math.PI / 180f
+    const val DEG_OFFSET = -90
 
     // Calculate the exact angle on the circle
     fun angle(center: Offset, offset: Offset): Float {
@@ -89,6 +48,7 @@ class TaskDialState (
         return minute * minuteAngle
     }
 
+    // Calculate the number of hour points between the start- and end time, e.g. between 6:20 AM and 11:12 AM there are 5 hour points: 7:00, 8:00, 9:00, 10:00 and 11:00.
     fun calculateClockHoursBetween (start: Time, end: Time): Int {
         return end.hour.minus(start.hour)
     }
@@ -111,13 +71,13 @@ class TaskDialState (
     }
 
     // Calculate minutes between adjacent hours, for example between 6:20 AM and 11:12 AM an array of [
-    // 40 (number of minutes between 6:20 and 7:00),
-    // 60 (number of minutes between 7:00 and 8:00),
-    // 60 (number of minutes between 8:00 and 9:00),
-    // 60 (number of minutes between 9:00 and 10:00),
-    // 60 (number of minutes between 10:00 and 11:00),
-    // 12 (number of minutes between 11:00 and 11:12)
-    // ] will be returned
+// 40 (number of minutes between 6:20 and 7:00),
+// 60 (number of minutes between 7:00 and 8:00),
+// 60 (number of minutes between 8:00 and 9:00),
+// 60 (number of minutes between 9:00 and 10:00),
+// 60 (number of minutes between 10:00 and 11:00),
+// 12 (number of minutes between 11:00 and 11:12)
+// ] will be returned
     fun calculateMinutesBetweenHours (start: Time, end: Time): Array<Int> {
         var minutes = emptyArray<Int>()
 
@@ -209,7 +169,7 @@ class TaskDialState (
             isTouchWithinAnyTask = checkIfTouchWithinAngleRange(angle, task.startAngle, task.endAngle)
 
             if (isTouchWithinAnyTask) {
-                touchedTaskId = task.id
+//            touchedTaskId = task.id
                 return isTouchWithinAnyTask
             }
         }
@@ -345,12 +305,4 @@ class TaskDialState (
             (360 - start + end).toFloat()
         }
     }
-}
-
-@Composable
-fun rememberTaskDialState(
-    activeTimeStart: Time,
-    activeTimeEnd: Time,
-) : TaskDialState {
-    return remember { TaskDialState(activeTimeStart, activeTimeEnd) }
 }

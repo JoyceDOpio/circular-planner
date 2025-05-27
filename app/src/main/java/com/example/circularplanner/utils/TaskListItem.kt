@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -46,7 +47,8 @@ fun TaskListItem(
 //                viewModel.setTaskId(taskId)
                 taskState.taskId = taskId//TODO: This has to be moved to the navigation stack entry
                 onNavigateToTaskInfo()
-            },
+            }
+            .sizeIn(maxHeight = 150.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
         ),

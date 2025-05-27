@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
@@ -68,7 +69,7 @@ fun TaskInfoScreen(
         Row (
             modifier = modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp),
+                .paddingFromBaseline(top = 10.dp),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -99,7 +100,7 @@ fun TaskInfoScreen(
         Row (
             modifier = modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp),
+                .paddingFromBaseline(top = 10.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -114,7 +115,7 @@ fun TaskInfoScreen(
         Row (
             modifier = modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp),
+                .paddingFromBaseline(top = 10.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {

@@ -51,9 +51,10 @@ fun TaskDisplayScreen(
     tasks: List<Task>,
 //    setNewTaskStartTime: (Time) -> Unit,
 //    setNewTaskEndTime: (Time) -> Unit,
-    getTask: (UUID) -> Task?,
+    getTask: (UUID?) -> Task?,
 //    removeTask: (UUID) -> Unit
-    removeTask: (Task) -> Unit
+    removeTask: (Task) -> Unit,
+//    updateTask: (UUID, String, Time, Time, String, Float?, Float?, Int?) -> Unit,
 ) {
     val simpleDateFormat = SimpleDateFormat("d MMMM")
     val date = simpleDateFormat.format(Date())
@@ -120,10 +121,12 @@ fun TaskDisplayScreen(
                         taskState = taskState,
                         onNavigateToTaskEdit = onNavigateToTaskEdit,
                         onNavigateToTaskInfo = onNavigateToTaskInfo,
-                        tasks = tasks
+                        tasks = tasks,
+                        getTask = getTask,
 //                        setNewTaskStartTime = setNewTaskStartTime,
 //                        setNewTaskEndTime = setNewTaskEndTime,
 //                        removeTask = removeTask
+//                        updateTask = updateTask
                     )
                 }
 
