@@ -1,7 +1,6 @@
-package com.example.circularplanner.ui.screen
+package com.example.circularplanner.ui.navigation
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -13,7 +12,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.circularplanner.data.Task
 import com.example.circularplanner.data.Time
-import com.example.circularplanner.ui.state.TaskState
+import com.example.circularplanner.ui.screen.ActiveTimeSetUpScreen
+import com.example.circularplanner.ui.screen.TaskDisplayScreen
+import com.example.circularplanner.ui.screen.TaskEditScreen
+import com.example.circularplanner.ui.screen.TaskInfoScreen
 import com.example.circularplanner.ui.state.rememberTaskState
 import com.example.circularplanner.ui.viewmodel.DataViewModel
 import java.util.UUID
@@ -21,7 +23,7 @@ import java.util.function.Predicate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(
+fun Navigation(
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -56,16 +58,6 @@ fun MainScreen(
         }
     })
 
-    var startActiveTimePickerState = rememberTimePickerState()
-    var endActiveTimePickerState = rememberTimePickerState()
-
-//    // The start end times of a new task
-//    var newTaskStartTimePickerState = rememberTimePickerState()
-//    var newTaskEndTimePickerState = rememberTimePickerState()
-
-    var newTaskStartTime: Time = Time(0,0)
-    var newTaskEndTime: Time = Time(0,0)
-
     fun addTask(title: String, startTime: Time, endTime: Time, description: String) {
         var newTask = Task(title, startTime, endTime, description = description)
         tasks.add(newTask)
@@ -77,14 +69,6 @@ fun MainScreen(
         }
 
         return null
-    }
-
-    fun setNewTaskStartTime(time: Time) {
-        newTaskStartTime = time
-    }
-
-    fun setNewTaskEndTime(time: Time) {
-        newTaskEndTime = time
     }
 
 //    fun removeTask(id: UUID) {
@@ -132,57 +116,57 @@ fun MainScreen(
 //                viewModel = dataViewModel,
                 taskState = taskState,
                 onNavigateToTaskDisplay = {
-                    navController.navigate(route = TaskDisplay)
+                    navController.navigate(route = TaskDisplayRoute)
                 }
             )
         }
 
-        composable<TaskDisplay> {
+        composable<TaskDisplayRoute> {
             TaskDisplayScreen(
 //                viewModel = dataViewModel,
                 taskState = taskState,
-                onNavigateToTaskEdit = {
-                    navController.navigate(route = TaskEdit)
+                onNavigateToTaskEdit = { id ->
+                    navController.navigate(route = TaskEditRoute(id = id))
                 },
-                onNavigateToTaskInfo = {
-                    navController.navigate(route = TaskInfo)
+                onNavigateToTaskInfo = { id ->
+                    navController.navigate(route = TaskInfoRoute(id = id!!))
                 },
                 tasks = sortedTasks,
 //                addTask = ::addTask,
-//                startActiveTimePickerState = startActiveTimePickerState,
-//                endActiveTimePickerState = endActiveTimePickerState,
-//                setNewTaskStartTime = ::setNewTaskStartTime,
-//                setNewTaskEndTime = ::setNewTaskEndTime,
                 getTask = ::getTask,
                 removeTask = ::removeTask,
 //                updateTask = ::updateTask
             )
         }
 
-        composable<TaskEdit> {
+        composable<TaskEditRoute> { backStackEntry ->
+            val data: TaskEditRoute = backStackEntry.toRoute<TaskEditRoute>()
+
             TaskEditScreen(
 //                viewModel = dataViewModel,
+//                data = data,
+                taskId = data.id,
                 taskState = taskState,
-                onNavigateToTaskDisplay = {
-                    navController.navigate(route = TaskDisplay)
+                onBack = {
+                    navController.popBackStack()
                 },
-//                startTime = newTaskStartTime,
-//                endTime = newTaskEndTime,
                 addTask = ::addTask,
                 getTask = ::getTask,
 //                updateTask = ::updateTask
             )
         }
 
-        composable<TaskInfo> {
+        composable<TaskInfoRoute> { backStackEntry ->
+            val data: TaskInfoRoute = backStackEntry.toRoute<TaskInfoRoute>()
+
             TaskInfoScreen(
 //                viewModel = dataViewModel,
-                taskState = taskState,
+                taskId = data.id,
                 onCancel = {
-                    navController.navigate(route = TaskDisplay)
+                    navController.popBackStack()
                 },
                 onNavigateToTaskEdit = {
-                    navController.navigate(route = TaskEdit)
+                    navController.navigate(route = TaskEditRoute(id = data.id))
                 },
                 getTask = ::getTask
             )

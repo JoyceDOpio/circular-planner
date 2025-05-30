@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,29 +23,21 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.circularplanner.data.Task
-import com.example.circularplanner.ui.state.TaskState
-import com.example.circularplanner.ui.viewmodel.DataViewModel
-import java.util.UUID
 
 @Composable
 fun TaskListItem(
     modifier: Modifier = Modifier,
 //    viewModel: DataViewModel,
-    taskState: TaskState,
-    onNavigateToTaskInfo: () -> Unit,
-    taskId: UUID,
-    getTask: (UUID) -> Task?,
+    onNavigateToTaskInfo: (String?) -> Unit,
+    task: Task,
+//    getTask: (UUID) -> Task?,
 //    removeTask: (UUID) -> Unit,
     removeTask: (Task) -> Unit,
 ){
-    val task = getTask(taskId)
-
     Card(
         modifier = modifier
             .clickable {
-//                viewModel.setTaskId(taskId)
-                taskState.taskId = taskId//TODO: This has to be moved to the navigation stack entry
-                onNavigateToTaskInfo()
+                onNavigateToTaskInfo(task.id.toString())
             }
             .sizeIn(maxHeight = 150.dp),
         elevation = CardDefaults.cardElevation(

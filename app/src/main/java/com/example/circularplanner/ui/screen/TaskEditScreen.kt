@@ -1,6 +1,5 @@
 package com.example.circularplanner.ui.screen
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -36,27 +34,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.circularplanner.R
 import com.example.circularplanner.data.Task
 import com.example.circularplanner.data.Time
 import com.example.circularplanner.ui.common.TimePickerDialog
 import com.example.circularplanner.ui.state.TaskState
-import com.example.circularplanner.ui.viewmodel.DataViewModel
-import kotlinx.serialization.Serializable
-import java.time.LocalDateTime
 import java.util.UUID
-
-@Serializable
-object TaskEdit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskEditScreen(
     modifier: Modifier = Modifier,
 //    viewModel: DataViewModel,
+//    data: TaskEdit,
+    taskId: String?,
     taskState: TaskState,
-    onNavigateToTaskDisplay: () -> Unit,
+//    onNavigateToTaskDisplay: () -> Unit,
+    onBack: () -> Unit,
 //    startTime: Time = Time(LocalDateTime.now().hour, LocalDateTime.now().minute),
 //    endTime: Time = Time(LocalDateTime.now().hour + 60, LocalDateTime.now().minute),
     addTask: (String, Time, Time, String) -> Unit,
@@ -65,7 +59,7 @@ fun TaskEditScreen(
 //    calculateAngle: () -> Unit,
 //    calculateTaskDuration: (Time, Time) -> Unit
 ) {
-    fun getLabel(taskId: UUID?): String {
+    fun getLabel(taskId: String?): String {
         if (taskId == null) {
             return "Create new task"
         }
@@ -75,7 +69,7 @@ fun TaskEditScreen(
 
 //    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val taskId = taskState.taskId
+//    val taskId = taskState.taskId
     var label: String = getLabel(taskId)
     var task: Task? = null
 
@@ -86,7 +80,7 @@ fun TaskEditScreen(
     var endTimePickerState: TimePickerState
 
     if (taskId != null) {
-        task = getTask(taskId)
+        task = getTask(UUID.fromString(taskId))
 
         startTimePickerState = rememberTimePickerState(
             initialHour = task!!.startTime.hour!!,
@@ -241,7 +235,8 @@ fun TaskEditScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(
-                onClick = onNavigateToTaskDisplay,
+//                onClick = onNavigateToTaskDisplay,
+                onClick = onBack,
                 modifier = modifier.weight(1f),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -274,7 +269,8 @@ fun TaskEditScreen(
                         )
                     }
 
-                    onNavigateToTaskDisplay()
+//                    onNavigateToTaskDisplay()
+                    onBack()
                 },
                 modifier = modifier.weight(1f),
                 shape = RoundedCornerShape(8.dp)

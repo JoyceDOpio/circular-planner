@@ -9,9 +9,7 @@ import kotlin.math.sqrt
 // Are we creating a new task or editing an existing task
 enum class TaskMode {
     CREATE,
-    EDIT,
-//    VIEW,
-//    NONE
+    EDIT
 }
 
 // Are we setting the start angle (start time) or end angle (end time) of a given task

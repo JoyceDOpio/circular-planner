@@ -9,7 +9,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.circularplanner.ui.screen.MainScreen
+import com.example.circularplanner.ui.navigation.Navigation
 import com.example.circularplanner.ui.theme.CircularPlannerTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             CircularPlannerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MainScreen(
+                    Navigation(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -32,6 +32,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DayPreview() {
     CircularPlannerTheme {
-        MainScreen()
+        Navigation()
     }
 }

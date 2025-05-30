@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
@@ -25,20 +24,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.circularplanner.data.Task
 import com.example.circularplanner.data.Time
 import com.example.circularplanner.ui.state.TaskState
-import com.example.circularplanner.ui.viewmodel.DataViewModel
 import java.util.UUID
 import kotlin.math.floor
 import com.example.circularplanner.utils.MainAppBar
 import com.example.circularplanner.utils.TaskDial
 import com.example.circularplanner.utils.TaskList
-import kotlinx.serialization.Serializable
 
-@Serializable
-object TaskDisplay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,11 +40,9 @@ fun TaskDisplayScreen(
 //    modifier: Modifier = Modifier,
 //    viewModel: DataViewModel,
     taskState: TaskState,
-    onNavigateToTaskEdit: () -> Unit,
-    onNavigateToTaskInfo: () -> Unit,
+    onNavigateToTaskEdit: (String?) -> Unit,
+    onNavigateToTaskInfo: (String?) -> Unit,
     tasks: List<Task>,
-//    setNewTaskStartTime: (Time) -> Unit,
-//    setNewTaskEndTime: (Time) -> Unit,
     getTask: (UUID?) -> Task?,
 //    removeTask: (UUID) -> Unit
     removeTask: (Task) -> Unit,
@@ -97,7 +89,6 @@ fun TaskDisplayScreen(
             MainAppBar(
 //                viewModel = viewModel,
 //                modifier = Modifier,
-                taskState = taskState,
                 onNavigateToTaskEdit = onNavigateToTaskEdit,
                 isList = isList,
                 onLayoutChangeRequested = { isList = !isList },
@@ -123,8 +114,6 @@ fun TaskDisplayScreen(
                         onNavigateToTaskInfo = onNavigateToTaskInfo,
                         tasks = tasks,
                         getTask = getTask,
-//                        setNewTaskStartTime = setNewTaskStartTime,
-//                        setNewTaskEndTime = setNewTaskEndTime,
 //                        removeTask = removeTask
 //                        updateTask = updateTask
                     )
@@ -137,7 +126,6 @@ fun TaskDisplayScreen(
                 ) {
                     TaskList (
 //                        viewModel = viewModel,
-                        taskState = taskState,
                         onNavigateToTaskInfo = onNavigateToTaskInfo,
                         tasks = tasks,
                         getTask = getTask,
