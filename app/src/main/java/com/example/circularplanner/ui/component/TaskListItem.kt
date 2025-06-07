@@ -1,4 +1,4 @@
-package com.example.circularplanner.utils
+package com.example.circularplanner.ui.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

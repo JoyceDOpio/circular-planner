@@ -1,13 +1,11 @@
-package com.example.circularplanner.utils
+package com.example.circularplanner.ui.component
 
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -16,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -40,15 +37,17 @@ import androidx.compose.ui.unit.sp
 import com.example.circularplanner.data.Task
 import com.example.circularplanner.data.Time
 import com.example.circularplanner.ui.state.TaskState
+import com.example.circularplanner.utils.AngleMode
+import com.example.circularplanner.utils.TaskDialUtils
 import com.example.circularplanner.utils.TaskDialUtils.DEG_OFFSET
 import com.example.circularplanner.utils.TaskDialUtils.DEG_TO_RAD
+import com.example.circularplanner.utils.TaskMode
 import java.time.LocalTime
 import java.util.UUID
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TaskDial(
 //    viewModel: DataViewModel,
@@ -124,7 +123,8 @@ fun TaskDial(
         var isTouchWithinAnyTask: Boolean = false
 
         for (task in tasks) {
-            isTouchWithinAnyTask = TaskDialUtils.checkIfTouchWithinAngleRange(angle, task.startAngle, task.endAngle)
+            isTouchWithinAnyTask =
+                TaskDialUtils.checkIfTouchWithinAngleRange(angle, task.startAngle, task.endAngle)
 
             if (isTouchWithinAnyTask) {
                 touchedTaskId = task.id
@@ -522,10 +522,11 @@ fun TaskDial(
                             )
                         }
                 ) {
-                    val minutesBetweenHoursAccumulated: Array<Int> = TaskDialUtils.calculateMinutesBetweenHoursAccumulated(
-                        activeTimeStart,
-                        activeTimeEnd
-                    )
+                    val minutesBetweenHoursAccumulated: Array<Int> =
+                        TaskDialUtils.calculateMinutesBetweenHoursAccumulated(
+                            activeTimeStart,
+                            activeTimeEnd
+                        )
                     val activeTimeHourSteps: Array<Time> = TaskDialUtils.createClockHoursArray(
                         activeTimeStart,
                         activeTimeEnd
@@ -584,7 +585,10 @@ fun TaskDial(
                             activeTimeStart,
                             task.endTime
                         )
-                        val taskDuration = TaskDialUtils.calculateTotalNumberOfMinutes(task.startTime, task.endTime)
+                        val taskDuration = TaskDialUtils.calculateTotalNumberOfMinutes(
+                            task.startTime,
+                            task.endTime
+                        )
 
                         // We have to offset these angles because startMinute * taskDialState.minuteAngle returns a biased angle
                         task.startAngle = TaskDialUtils.offsetAngle(startMinute * minuteAngle)

@@ -1,6 +1,5 @@
 package com.example.circularplanner.ui.navigation
 
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -21,7 +20,6 @@ import com.example.circularplanner.ui.viewmodel.DataViewModel
 import java.util.UUID
 import java.util.function.Predicate
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Navigation(
     modifier: Modifier = Modifier
@@ -123,7 +121,7 @@ fun Navigation(
 
         composable<TaskDisplayRoute> {
             TaskDisplayScreen(
-//                viewModel = dataViewModel,
+                viewModel = dataViewModel,
                 taskState = taskState,
                 onNavigateToTaskEdit = { id ->
                     navController.navigate(route = TaskEditRoute(id = id))

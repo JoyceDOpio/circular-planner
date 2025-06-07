@@ -10,7 +10,7 @@ import java.util.UUID
 class TaskState() {
     var activeTimeStart: Time = Time(0, 0)
     var activeTimeEnd: Time = Time(0, 0)
-    var taskId: UUID? = null
+//    var taskId: UUID? = null
     var taskStartTime: Time = Time(0, 0)
     var taskEndTime: Time = Time(0, 0)
 }

@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.example.circularplanner.R
 import com.example.circularplanner.data.Task
 import com.example.circularplanner.data.Time
-import com.example.circularplanner.ui.common.TimePickerDialog
+import com.example.circularplanner.ui.component.TimePickerDialog
 import com.example.circularplanner.ui.state.TaskState
 import java.util.UUID
 
@@ -49,15 +49,10 @@ fun TaskEditScreen(
 //    data: TaskEdit,
     taskId: String?,
     taskState: TaskState,
-//    onNavigateToTaskDisplay: () -> Unit,
     onBack: () -> Unit,
-//    startTime: Time = Time(LocalDateTime.now().hour, LocalDateTime.now().minute),
-//    endTime: Time = Time(LocalDateTime.now().hour + 60, LocalDateTime.now().minute),
     addTask: (String, Time, Time, String) -> Unit,
     getTask: (UUID) -> Task?,
 //    updateTask: (UUID, String, Time, Time, String, Float?, Float?, Int?) -> Unit,
-//    calculateAngle: () -> Unit,
-//    calculateTaskDuration: (Time, Time) -> Unit
 ) {
     fun getLabel(taskId: String?): String {
         if (taskId == null) {

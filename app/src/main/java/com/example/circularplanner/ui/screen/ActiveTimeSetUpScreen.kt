@@ -29,8 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.example.circularplanner.R
 import com.example.circularplanner.ui.ActiveTime
 import com.example.circularplanner.ui.ActiveTimePicker
-import com.example.circularplanner.ui.common.TimePickerDialog
-import kotlinx.serialization.Serializable
+import com.example.circularplanner.ui.component.TimePickerDialog
 import com.example.circularplanner.data.Time
 import com.example.circularplanner.ui.state.TaskState
 

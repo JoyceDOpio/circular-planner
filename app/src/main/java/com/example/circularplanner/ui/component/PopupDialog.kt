@@ -1,4 +1,4 @@
-package com.example.circularplanner.ui.common
+package com.example.circularplanner.ui.component
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
