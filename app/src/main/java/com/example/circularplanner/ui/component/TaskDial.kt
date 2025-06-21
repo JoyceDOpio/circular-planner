@@ -29,14 +29,14 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.circularplanner.data.Task
 import com.example.circularplanner.data.Time
-import com.example.circularplanner.ui.state.TaskState
+import com.example.circularplanner.ui.viewmodel.TaskDisplayUiState
 import com.example.circularplanner.utils.AngleMode
 import com.example.circularplanner.utils.TaskDialUtils
 import com.example.circularplanner.utils.TaskDialUtils.DEG_OFFSET
@@ -48,28 +48,27 @@ import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
 
+const val TOUCH_STROKE = 50f
+
 @Composable
 fun TaskDial(
-//    viewModel: DataViewModel,
-    taskState: TaskState,
+    uiState: TaskDisplayUiState,
     onNavigateToTaskEdit: (String?) -> Unit,
     onNavigateToTaskInfo: (String?) -> Unit,
-    tasks: List<Task>,//TODO: a method for retrieving tasks should be provided by a view model,
-    getTask: (UUID?) -> Task?,//TODO: a method for retrieving tasks should be provided by a view model,
-//    removeTask: (UUID) -> Unit//TODO: a method for retrieving tasks should be provided by a view model
-//    removeTask: (Task) -> Unit
-//    updateTask: (UUID, String, Time, Time, String, Float, Float, Int) -> Unit
+    onPressActiveTime: () -> Unit,
+    onSetTaskEndTime: (Time) -> Unit,
+    onSetTaskStartTime: (Time) -> Unit,
+    saveTask: () -> Unit,
+    selectTask: (UUID?) -> Unit
 ) {
-
-//    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val textMeasurer = rememberTextMeasurer()
-
-    var activeTimeStart: Time = taskState.activeTimeStart
-    var activeTimeEnd: Time = taskState.activeTimeEnd
+    val activeTimeStart: Time = uiState.dayDetails.activeTimeStart
+    val activeTimeEnd: Time = uiState.dayDetails.activeTimeEnd
     var taskMode: TaskMode by remember { mutableStateOf(TaskMode.CREATE) }
     var angleMode: AngleMode by remember { mutableStateOf(AngleMode.NONE) }
+    val activeTimeColor = MaterialTheme.colorScheme.primary
 
-    var totalMinutes: Int = TaskDialUtils.calculateTotalNumberOfMinutes(
+    val totalMinutes: Int = TaskDialUtils.calculateTotalNumberOfMinutes(
         Time(
             activeTimeStart.hour,
             activeTimeStart.minute
@@ -79,9 +78,7 @@ fun TaskDial(
             activeTimeEnd.minute
         )
     )
-    var minuteAngle: Float = 360 / totalMinutes.toFloat()
-
-    var touchedTaskId by remember { mutableStateOf<UUID?>(null) }
+    val minuteAngle: Float = 360 / totalMinutes.toFloat()
 
     // Note the start and end angle of where the finger touched the screen to get the supposed new start and end time values of a task:
     // - values used to trace the finger movement
@@ -101,7 +98,7 @@ fun TaskDial(
     var center by remember { mutableStateOf(Offset.Zero) }
 
     // Basically the width of the finger touch on the screen
-    var touchStroke: Float = 50f
+    var touchStroke: Float = TOUCH_STROKE
 
     // The radius of the dial
     var outerRadius by remember { mutableStateOf(0f) }
@@ -112,22 +109,38 @@ fun TaskDial(
 
     // Variables to identify whether the dial was touched within an existing task area
     var touchWithinTaskArea by remember { mutableStateOf(true) }
-    var touchedTask by remember { mutableStateOf<Task?>(null) }
+    var touchedTaskId by remember { mutableStateOf<UUID?>(null) }
+    var touchedTask = uiState.taskDetails
 
     var clockCenterTime by remember { mutableStateOf(Time(LocalTime.now().hour, LocalTime.now().minute)) }
     // Draw a pointer on the dial to illustrate the finger's movement along the dial edge
     var drawFingerPointer by remember { mutableStateOf(false) }
+
+    val tasks = uiState.dayDetails.tasks
+
+    var touchWithinActiveTime by remember { mutableStateOf(false) }
 
     fun checkIfTouchWithinTaskArea(angle: Float, tasks: List<Task>): Boolean {
         // The task stores the appropriate angle values, i.e. values corresponding to how the circle is drawn (the 0 degree starts at the right-hand side (east) of the circle). We want to 'correct' these angles as if 0 degree starts at the top of the circle (north)
         var isTouchWithinAnyTask: Boolean = false
 
         for (task in tasks) {
+            val taskStartAngle = TaskDialUtils.calculateTaskAngle (
+                activeTimeStart,
+                task.startTime,
+                minuteAngle
+            )
+            val taskEndAngle = TaskDialUtils.calculateTaskAngle (
+                activeTimeStart,
+                task.endTime,
+                minuteAngle
+            )
             isTouchWithinAnyTask =
-                TaskDialUtils.checkIfTouchWithinAngleRange(angle, task.startAngle, task.endAngle)
+                TaskDialUtils.checkIfTouchWithinAngleRange(angle, taskStartAngle, taskEndAngle)
 
             if (isTouchWithinAnyTask) {
                 touchedTaskId = task.id
+
                 return isTouchWithinAnyTask
             }
         }
@@ -139,14 +152,7 @@ fun TaskDial(
         touchNearTheDialEdge = false
         drawNewTaskTimeRange = false
         touchWithinTaskArea = false
-//        changeStartTimeTaskBorder = false
-//        changeEndTimeTaskBorder = false
-//        touchedTask = null
-//        settingAngle = false
-//        settingNewTask = true
-//        action = Action.NONE
-//        angleSettingMode = AngleMode.NONE
-//        taskMode = TaskMode.NONE
+        touchedTaskId = null
     }
 
     fun resetClockCenter() {
@@ -177,16 +183,10 @@ fun TaskDial(
                 Canvas (
                     modifier = Modifier
                         .fillMaxSize()
-//                                .fillMaxWidth()
-//                                .aspectRatio(1f)
-//                                .size(400.dp)
-//                                .background(Color.Gray)
                         .onGloballyPositioned {
                             width = it.size.width
                             height = it.size.height
                             center = Offset(width / 2f, height / 2f)
-//                                    radius = min(width.toFloat(), height.toFloat()) / 2f - padding - stroke / 2f
-//                                    radius = min(width.toFloat(), height.toFloat()) / 2f
                             // The radius of the dial
                             outerRadius = min(width.toFloat(), height.toFloat()) / 2f
                             // The radius from the center to the clock steps
@@ -240,14 +240,7 @@ fun TaskDial(
                                             endAngle = currentAngle
                                             tmpEndAngle = endAngle
 
-//                                    // TODO: Make sure the angle doesn't overlap with an existing task angle
-//                                    if (currentAngle > allowedAngleRange.first && currentAngle < allowedAngleRange.second) {
-//                                        angle = currentAngle
-//                                    }
-
-                                            // TODO: Calculate the time represented by the angle to display it in the clock center
-
-
+                                            // Calculate the time represented by the angle to display it in the clock center
                                             val minute = TaskDialUtils.calculateMinutes(
                                                 TaskDialUtils.angleForTimeCalculation(angle),
                                                 minuteAngle
@@ -285,12 +278,12 @@ fun TaskDial(
                                                     taskEndTimeMinute
                                                 )
 
-//                                        viewModel.setTaskStartTime(clockTaskStartTime)
-//                                        viewModel.setTaskEndTime(clockTaskEndTime)
-                                            taskState.taskStartTime = clockTaskStartTime
-                                            taskState.taskEndTime = clockTaskEndTime
+                                            onSetTaskStartTime(clockTaskStartTime)
+                                            onSetTaskEndTime(clockTaskEndTime)
 
-                                            onNavigateToTaskEdit(touchedTaskId.toString())
+                                            onNavigateToTaskEdit(
+                                                null
+                                            )
                                         }
                                     } else {
                                         reset()
@@ -320,6 +313,7 @@ fun TaskDial(
                                                 )
 
                                             if (touchWithinTaskArea) {
+                                                selectTask(touchedTaskId)
                                                 // Show task info
                                                 onNavigateToTaskInfo(touchedTaskId.toString())
                                             }
@@ -333,64 +327,92 @@ fun TaskDial(
                                                 )
 
                                             if (touchWithinTaskArea) {
+                                                selectTask(touchedTaskId)
                                                 // Start angle carries now the supposedly new value for start time of the given task, the end angle the value for the end time, respectively. Update the task:
-                                                val task = getTask(touchedTaskId)
-
-                                                // TODO: Move task update method to View Model
-                                                if (task != null) {
-                                                    // - start time
-                                                    var minute = TaskDialUtils.calculateMinutes(
-                                                        TaskDialUtils.angleForTimeCalculation(
-                                                            tmpStartAngle
-                                                        ),
-                                                        minuteAngle
+                                                // - start time
+                                                val startMinute = TaskDialUtils.calculateMinutes(
+                                                    TaskDialUtils.angleForTimeCalculation(
+                                                        tmpStartAngle
+                                                    ),
+                                                    minuteAngle
+                                                )
+                                                val clockTaskStartTime =
+                                                    TaskDialUtils.calculateClockTimeBasedOnMinutesFromStartTime(
+                                                        start = activeTimeStart,
+                                                        minutes = startMinute
                                                     )
-                                                    var clockTime =
-                                                        TaskDialUtils.calculateClockTimeBasedOnMinutesFromStartTime(
-                                                            start = activeTimeStart,
-                                                            minutes = minute
-                                                        )
-                                                    task.startTime = clockTime
-
-                                                    // - end time
-                                                    minute = TaskDialUtils.calculateMinutes(
-                                                        TaskDialUtils.angleForTimeCalculation(
-                                                            tmpEndAngle
-                                                        ),
-                                                        minuteAngle
+                                                // - end time
+                                                val endMinute = TaskDialUtils.calculateMinutes(
+                                                    TaskDialUtils.angleForTimeCalculation(
+                                                        tmpEndAngle
+                                                    ),
+                                                    minuteAngle
+                                                )
+                                                val clockTaskEndTime =
+                                                    TaskDialUtils.calculateClockTimeBasedOnMinutesFromStartTime(
+                                                        start = activeTimeStart,
+                                                        minutes = endMinute
                                                     )
-                                                    clockTime =
-                                                        TaskDialUtils.calculateClockTimeBasedOnMinutesFromStartTime(
-                                                            start = activeTimeStart,
-                                                            minutes = minute
-                                                        )
-                                                    task.endTime = clockTime
 
-                                                    // - start angle
-                                                    task.startAngle = tmpStartAngle
-
-                                                    // - end time
-                                                    task.endAngle = tmpEndAngle
-
-                                                    // - duration (in minutes)
-                                                    task.durationInMinutes =
-                                                        TaskDialUtils.calculateTotalNumberOfMinutes(
-                                                            task.startTime,
-                                                            task.endTime
-                                                        )
-                                                }
+                                                onSetTaskStartTime(clockTaskStartTime)
+                                                onSetTaskEndTime(clockTaskEndTime)
+                                                saveTask()
 
                                                 // Switch the task mode to CREATE and reset
                                                 taskMode = TaskMode.CREATE
-                                                touchedTask = null
                                                 reset()
                                             }
                                         }
                                     } else {
                                         // Cancel everything if touch is outside the dial
                                         taskMode = TaskMode.CREATE
-                                        touchedTask = null
                                         reset()
+
+                                        // Check if the touch was within the active time
+                                        var stepAngle = 0 * minuteAngle + DEG_OFFSET
+                                        val minutesBetweenHoursAccumulated: Array<Int> =
+                                            TaskDialUtils.calculateMinutesBetweenHoursAccumulated(
+                                                activeTimeStart,
+                                                activeTimeEnd
+                                            )
+                                        val activeTimeHourSteps: Array<Time> = TaskDialUtils.createClockHoursArray(
+                                            activeTimeStart,
+                                            activeTimeEnd
+                                        )
+                                        var hourStep = activeTimeHourSteps[0]
+                                        // Let only the first and last label display the hour and minute values - other labels will display only the hour value
+                                        val hourStepLabel = buildAnnotatedString {
+                                            append(String.format("%d:%02d", hourStep.hour, hourStep.minute))
+                                            appendLine()
+                                            hourStep = activeTimeHourSteps[minutesBetweenHoursAccumulated.size - 1]
+                                            append(String.format("%d:%02d", hourStep.hour, hourStep.minute))
+                                        }
+                                        val hourStepLabelTextLayout = textMeasurer.measure(
+                                            text = hourStepLabel,
+                                            style = TextStyle(textAlign = TextAlign.Center)
+                                        )
+
+                                        var circleCenterOffset = Offset(
+                                            x = center.x + (outerRadius * cos(stepAngle * DEG_TO_RAD)).toFloat(),
+                                            y = center.y + (outerRadius * sin(stepAngle * DEG_TO_RAD)).toFloat()
+                                        )
+
+                                        circleCenterOffset = Offset(
+                                            x = circleCenterOffset.x,
+                                            y = circleCenterOffset.y - (hourStepLabelTextLayout.size.height * 1.2f)
+                                        )
+
+                                        touchWithinActiveTime = TaskDialUtils.checkIfTouchWithinActiveTime(
+                                            offset = offset,
+                                            activeTimeCenter = circleCenterOffset,
+                                            activeTimeRadius = hourStepLabelTextLayout.size.width * 0.8f,
+                                            touchStroke = touchStroke
+                                        )
+
+                                        if (touchWithinActiveTime) {
+                                            // Show active time setup
+                                            onPressActiveTime()
+                                        }
                                     }
                                 },
                                 onDoubleTap = { offset ->
@@ -413,15 +435,23 @@ fun TaskDial(
 
                                         if (touchWithinTaskArea) {
                                             taskMode = TaskMode.EDIT
-                                            touchedTask = getTask(touchedTaskId)
+                                            selectTask(touchedTaskId)
 
-                                            if (touchedTask != null) {
-                                                tmpStartAngle = touchedTask!!.startAngle
-                                                tmpEndAngle = touchedTask!!.endAngle
+                                            val taskStartAngle = TaskDialUtils.calculateTaskAngle(
+                                                activeTimeStart,
+                                                touchedTask.startTime,
+                                                minuteAngle
+                                            )
+                                            val taskEndAngle = TaskDialUtils.calculateTaskAngle(
+                                                activeTimeStart,
+                                                touchedTask.endTime,
+                                                minuteAngle
+                                            )
+                                            tmpStartAngle = taskStartAngle
+                                            tmpEndAngle = taskEndAngle
 
-                                                // Draw this task separately than other tasks
-                                                drawNewTaskTimeRange = true
-                                            }
+                                            // Draw this task separately than other tasks
+                                            drawNewTaskTimeRange = true
                                         }
                                     } else {
                                         // Cancel everything if touch is outside the dial
@@ -434,10 +464,9 @@ fun TaskDial(
                             // Defining time range: TASK EDITING
                             detectDragGestures(
                                 onDragStart = { offset ->
-//                                    Log.i("taskMode", taskMode.toString())
-//                                    // Get the starting coordinates and determine if the touch is:
-//                                    // 1. within the dial
-//                                    // 2. within any existing task area
+                                    // Get the starting coordinates and determine if the touch is:
+                                    // 1. within the dial
+                                    // 2. within any existing task area
                                     val distance = TaskDialUtils.distance(offset, center)
                                     touchNearTheDialEdge = TaskDialUtils.checkIfTouchNearDialEdge(
                                         distance,
@@ -531,22 +560,13 @@ fun TaskDial(
                         activeTimeStart,
                         activeTimeEnd
                     )
-//                    val activeTimeHourSteps = arrayOf(
-//                        Time(6,20),
-//                        Time(7,0),
-//                        Time(8,0),
-//                        Time(9,0),
-//                        Time(10,0),
-//                        Time(11,0),
-//                        Time(11,12)
-//                    )
                     outerRadius = min(width, height) / 2f * 0.8f
                     innerRadius = outerRadius * .8f
 
                     drawHourStepsAndLabels(
+                        activeTimeColor = activeTimeColor,
                         minutesBetweenHoursAccumulated = minutesBetweenHoursAccumulated,
                         minuteAngle = minuteAngle,
-                        innerRadius = innerRadius,
                         outerRadius = outerRadius,
                         activeTimeHourSteps = activeTimeHourSteps,
                         textMeasurer = textMeasurer,
@@ -564,7 +584,6 @@ fun TaskDial(
                     if (drawNewTaskTimeRange) {
 
                         drawNewTaskArea(
-//                            startAngle = startAngle,
                             startAngle = tmpStartAngle,
                             size = size,
                             outerRadius = outerRadius,
@@ -577,31 +596,24 @@ fun TaskDial(
                     }
 
                     for (task in tasks) {
-                        val startMinute = TaskDialUtils.calculateTotalNumberOfMinutes(
+                        // We have to offset these angles because startMinute * taskDialState.minuteAngle returns a biased angle
+                        val taskStartAngle = TaskDialUtils.calculateTaskAngle (
                             activeTimeStart,
-                            task.startTime
-                        )
-                        val endMinute = TaskDialUtils.calculateTotalNumberOfMinutes(
-                            activeTimeStart,
-                            task.endTime
+                            task.startTime,
+                            minuteAngle
                         )
                         val taskDuration = TaskDialUtils.calculateTotalNumberOfMinutes(
                             task.startTime,
                             task.endTime
                         )
 
-                        // We have to offset these angles because startMinute * taskDialState.minuteAngle returns a biased angle
-                        task.startAngle = TaskDialUtils.offsetAngle(startMinute * minuteAngle)
-                        task.endAngle = TaskDialUtils.offsetAngle(endMinute * minuteAngle)
-                        task.durationInMinutes = taskDuration
-
                         // Don't draw the task whose time bounds are being edited
                         if (!(task.id == touchedTask?.id && taskMode == TaskMode.EDIT)) {
                             drawTask(
-                                taskStartAngle = task.startAngle,
+                                taskStartAngle = taskStartAngle,
                                 minuteAngle = minuteAngle,
                                 outerRadius = outerRadius,
-                                taskDuration = task.durationInMinutes,
+                                taskDuration = taskDuration,
                                 color = Color.Cyan
                             )
                         }
@@ -618,8 +630,7 @@ fun TaskDial(
                     drawClockCenter(
                         textMeasurer = textMeasurer,
                         radius = centerRadius,
-                        hourFontSize = 32.sp,
-                        minuteFontSize = 16.sp,
+                        fontSize = 32.sp,
                         label = clockCenterTime
                     )
                 }
@@ -628,113 +639,10 @@ fun TaskDial(
     )
 }
 
-fun DrawScope.drawHourStepsAndLabels(
-    minutesBetweenHoursAccumulated: Array<Int>,
-    minuteAngle: Float,
-    innerRadius: Float,
-    outerRadius: Float,
-    activeTimeHourSteps: Array<Time>,
-    textMeasurer: TextMeasurer,
-) {
-    // Draw hour steps and labels
-    for (i in 0..minutesBetweenHoursAccumulated.size - 1) {
-        // Draw hour steps
-        var stepAngle = minutesBetweenHoursAccumulated[i] * minuteAngle + DEG_OFFSET
-
-        val stepStartOffset = Offset(
-            x = center.x + (innerRadius * 1.15 * cos(stepAngle * DEG_TO_RAD)).toFloat(),
-            y = center.y + (innerRadius * 1.15 * sin(stepAngle * DEG_TO_RAD)).toFloat()
-        )
-
-        val stepEndOffset = Offset(
-            x = center.x + (outerRadius * cos(stepAngle * DEG_TO_RAD)).toFloat(),
-            y = center.y + (outerRadius * sin(stepAngle * DEG_TO_RAD)).toFloat()
-        )
-
-        drawLine(
-            Color.LightGray,
-            start = stepStartOffset,
-            end = stepEndOffset,
-            strokeWidth = 2.5.dp.toPx(),
-            cap = StrokeCap.Round
-        )
-
-        // Draw hour labels
-        val hourStep = activeTimeHourSteps[i]
-        val hourLabel = String.format("%d", hourStep.hour)
-        val minuteLabel = String.format("%02d", hourStep.minute)
-        val hourStepLabel = buildAnnotatedString {
-            append(hourLabel)
-
-            // Apply font size and baseline shift for the superscript
-            withStyle(style = SpanStyle(
-                fontSize = 9.sp,
-                baselineShift = BaselineShift.Superscript
-            )) {
-                append(minuteLabel)
-            }
-        }
-
-        val hourStepLabelTextLayout = textMeasurer.measure(
-            text = hourStepLabel,
-            style = TextStyle()
-        )
-
-//        val stepsLabelOffset = Offset(
-//            x = center.x + (radius - stepsHeight - dialStyle.stepsLabelTopPadding.toPx()) * cos(
-//                (stepsAngle + rotation) * (Math.PI / 180)
-//            ).toFloat(),
-//            y = center.y - (radius - stepsHeight - dialStyle.stepsLabelTopPadding.toPx()) * sin(
-//                (stepsAngle + rotation) * (Math.PI / 180)
-//            ).toFloat()
-//        )
-        var stepsHeight = 10.dp.toPx()
-//        var stepsHeight = 0.dp.toPx()
-        val stepsLabelTopPadding = 12.dp
-//        val stepsLabelTopPadding = 0.dp
-        // The last label is to be placed above the first
-        val labelYOffset = if (i == minutesBetweenHoursAccumulated.size - 1) 25.dp.toPx() else 0.dp.toPx()
-        stepAngle = minutesBetweenHoursAccumulated[i] * minuteAngle + DEG_OFFSET
-        val stepsLabelOffset = Offset(
-            x = center.x + ((outerRadius + stepsLabelTopPadding.toPx() + stepsHeight) * cos(stepAngle * DEG_TO_RAD)).toFloat(),
-            y = center.y + ((outerRadius + stepsLabelTopPadding.toPx() + stepsHeight + labelYOffset) * sin(stepAngle * DEG_TO_RAD)).toFloat()
-        )
-
-        //subtract the label width and height to position label at the center of the step
-        val stepsLabelTopLeft = Offset(
-            stepsLabelOffset.x - ((hourStepLabelTextLayout.size.width) / 3f),
-            stepsLabelOffset.y - (hourStepLabelTextLayout.size.height / 2f)
-        )
-
-        val labelCircleOffset = Offset(
-            x = center.x + (outerRadius * cos(stepAngle * DEG_TO_RAD)).toFloat(),
-            y = center.y + (outerRadius * sin(stepAngle * DEG_TO_RAD)).toFloat()
-        )
-
-//        drawCircle(
-//            color = Color.LightGray,
-//            center = labelCircleOffset,
-//            radius = 16.dp.toPx(),
-////            style = Stroke(
-////                width = 2f
-////            )
-//        )
-
-        drawText(
-            textMeasurer = textMeasurer,
-            text = hourStepLabel,
-            topLeft = stepsLabelTopLeft,
-//                style = dialStyle.stepsTextStyle
-            style = TextStyle()
-        )
-    }
-}
-
 fun DrawScope.drawClockCenter(
     textMeasurer: TextMeasurer,
     radius: Float,
-    hourFontSize: TextUnit = 26.sp,
-    minuteFontSize: TextUnit = 14.sp,
+    fontSize: TextUnit = 26.sp,
     label: Time
 ) {
     // Draw clock center
@@ -744,24 +652,12 @@ fun DrawScope.drawClockCenter(
         radius = radius,
     )
 
-    var hourLabel = (label.hour).toString()
-    var minuteLabel = String.format("%02d", label.minute)
-
     val clockHourLabel = buildAnnotatedString {
         withStyle(style = SpanStyle(
-            fontSize = hourFontSize,
+            fontSize = fontSize,
             fontWeight = FontWeight.Bold
         )) {
-            append(hourLabel)
-        }
-
-        // Apply font size and baseline shift for the superscript
-        withStyle(style = SpanStyle(
-            fontSize = minuteFontSize,
-            fontWeight = FontWeight.Bold,
-            baselineShift = BaselineShift.Superscript
-        )) {
-            append(minuteLabel)
+            append(String.format("%d:%02d", label.hour, label.minute))
         }
     }
 
@@ -771,7 +667,7 @@ fun DrawScope.drawClockCenter(
     )
 
     var clockCenterLabelOffset = Offset(
-        center.x - hourStepLabelTextLayout.size.width / 3f,
+        center.x - hourStepLabelTextLayout.size.width / 2f,
         center.y - hourStepLabelTextLayout.size.height / 2f
     )
 
@@ -780,7 +676,6 @@ fun DrawScope.drawClockCenter(
         textMeasurer = textMeasurer,
         text = clockHourLabel,
         topLeft = clockCenterLabelOffset,
-//                style = dialStyle.stepsTextStyle
         style = TextStyle()
     )
 }
@@ -790,7 +685,6 @@ fun DrawScope.drawFingerPointer(
     touchStroke: Float,
     angle: Float
 ) {
-//    var stepAngle = angle + DEG_OFFSET
     var stepAngle = angle
 
     val stepStartOffset = Offset(
@@ -814,10 +708,103 @@ fun DrawScope.drawFingerPointer(
     // Draw clock center
     drawCircle(
         color = Color.DarkGray,
-//        center = center,
         center = stepEndOffset,
         radius = touchStroke,
     )
+}
+
+fun DrawScope.drawHourStepsAndLabels(
+    activeTimeColor: Color,
+    minutesBetweenHoursAccumulated: Array<Int>,
+    minuteAngle: Float,
+    outerRadius: Float,
+    activeTimeHourSteps: Array<Time>,
+    textMeasurer: TextMeasurer,
+) {
+    val textStyle = TextStyle(
+        textAlign = TextAlign.Center
+    )
+    val activeTimeTextStyle = textStyle.copy(
+        color = Color.White
+    )
+
+    // Draw hour steps and labels
+    for (i in 0..(minutesBetweenHoursAccumulated.size - 2)) {
+        // Draw hour steps
+        var stepAngle = minutesBetweenHoursAccumulated[i] * minuteAngle + DEG_OFFSET
+
+        // Draw hour labels
+        var hourStep = activeTimeHourSteps[i]
+        // Let only the first and last label display the hour and minute values - other labels will display only the hour value
+        val hourStepLabel = buildAnnotatedString {
+            if (i == 0) {
+                append(String.format("%d:%02d", hourStep.hour, hourStep.minute))
+                appendLine()
+                hourStep = activeTimeHourSteps[minutesBetweenHoursAccumulated.size - 1]
+                append(String.format("%d:%02d", hourStep.hour, hourStep.minute))
+            } else {
+                append(String.format("%d", hourStep.hour))
+            }
+        }
+        val hourStepLabelTextLayout = textMeasurer.measure(
+            text = hourStepLabel,
+            style = textStyle
+        )
+
+        // Calculate the angle of the step
+        stepAngle = minutesBetweenHoursAccumulated[i] * minuteAngle + DEG_OFFSET
+        var stepLabelOffset = Offset(
+            x = center.x + (outerRadius * cos(stepAngle * DEG_TO_RAD)).toFloat(),
+            y = center.y + (outerRadius * sin(stepAngle * DEG_TO_RAD)).toFloat()
+        )
+        // Subtract the label width and height to position label at the center of the step
+        stepLabelOffset = Offset(
+            // Subtracting from the x moves the element to the left
+            stepLabelOffset.x - ((hourStepLabelTextLayout.size.width) / 2f),
+            // Subtracting from the y moves the element up
+            stepLabelOffset.y - (hourStepLabelTextLayout.size.height / 2f)
+        )
+
+        if (i == 0) {
+            stepLabelOffset = Offset(
+                stepLabelOffset.x,
+                stepLabelOffset.y - (hourStepLabelTextLayout.size.height * 1.2f)
+            )
+
+            var circleCenterOffset = Offset(
+                x = center.x + (outerRadius * cos(stepAngle * DEG_TO_RAD)).toFloat(),
+                y = center.y + (outerRadius * sin(stepAngle * DEG_TO_RAD)).toFloat()
+            )
+
+            // Draw a circle only to mark the start/end of active time
+            drawCircle(
+                color = Color.LightGray,
+                radius = 15f,
+                center = circleCenterOffset
+            )
+
+            circleCenterOffset = Offset(
+                x = circleCenterOffset.x,
+                y = circleCenterOffset.y - (hourStepLabelTextLayout.size.height * 1.2f)
+            )
+
+            // Draw a circle around the active time start and end labels
+            drawCircle(
+//                color = Color.LightGray,
+                color = activeTimeColor,
+                radius = hourStepLabelTextLayout.size.width * 0.8f,
+                center = circleCenterOffset,
+//                style = Stroke(width = 5f)
+            )
+        }
+
+        drawText(
+            textMeasurer = textMeasurer,
+            text = hourStepLabel,
+            topLeft = stepLabelOffset,
+            style = if (i == 0 ) activeTimeTextStyle else textStyle
+        )
+    }
 }
 
 fun DrawScope.drawMinuteSteps(
@@ -830,16 +817,16 @@ fun DrawScope.drawMinuteSteps(
 {
     // Draw minute (1-, 5-, 10-, 15- or 30-minute) steps
     var minuteStep: Int
-    if (minuteAngle >= 5) {
-        minuteStep = 1
+    minuteStep = if (minuteAngle >= 5) {
+        1
     } else if (1 <= minuteAngle && minuteAngle < 5) {
-        minuteStep = 5
+        5
     } else if (0.5 <= minuteAngle && minuteAngle < 1) {
-        minuteStep = 15
+        15
     } else if (0.25 <= minuteAngle && minuteAngle < 0.5) {
-        minuteStep = 15
+        15
     } else {
-        minuteStep = 30
+        30
     }
 
     for (i in 0..totalMinutes) {
@@ -856,12 +843,10 @@ fun DrawScope.drawMinuteSteps(
                 y = center.y + (outerRadius * sin(stepAngle * DEG_TO_RAD)).toFloat()
             )
 
-            drawLine(
-                Color.LightGray,
-                start = stepStartOffset,
-                end = stepEndOffset,
-                strokeWidth = 1.dp.toPx(),
-                cap = StrokeCap.Round
+            drawCircle(
+                color = Color.LightGray,
+                radius = 5f,
+                center = stepEndOffset,
             )
         }
     }

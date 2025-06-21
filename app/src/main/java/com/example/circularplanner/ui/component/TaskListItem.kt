@@ -27,12 +27,8 @@ import com.example.circularplanner.data.Task
 @Composable
 fun TaskListItem(
     modifier: Modifier = Modifier,
-//    viewModel: DataViewModel,
     onNavigateToTaskInfo: (String?) -> Unit,
     task: Task,
-//    getTask: (UUID) -> Task?,
-//    removeTask: (UUID) -> Unit,
-    removeTask: (Task) -> Unit,
 ){
     Card(
         modifier = modifier
@@ -53,7 +49,9 @@ fun TaskListItem(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.Top
         ) {
-            Column () {
+            Column (
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = String.format("%d:%02d - %d:%02d", task!!.startTime.hour, task!!.startTime.minute, task!!.endTime.hour, task!!.endTime.minute),
                 )
@@ -66,9 +64,11 @@ fun TaskListItem(
                 thickness = 2.dp,
             )
 
-            Column () {
+            Column (
+                modifier = Modifier.weight(2f)
+            ) {
                 Text(
-                    text = task!!.title,
+                    text = task.title,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )

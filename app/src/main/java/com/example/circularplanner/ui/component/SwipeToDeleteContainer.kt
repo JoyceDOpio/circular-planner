@@ -32,7 +32,6 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> SwipeToDeleteContainer(
-//    viewModel: DataViewModel,
     modifier: Modifier = Modifier,
     item: T,
     onDelete: (T) -> Unit,

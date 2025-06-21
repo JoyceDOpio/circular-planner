@@ -1,26 +1,21 @@
 package com.example.circularplanner.data
 
-data class Time(var hour: Int = 0, var minute: Int = 0) {
-//    var hour: Int? = null
-//    var minute: Int? = null
+data class Time(
+    var hour: Int = 0,
+    var minute: Int = 0
+) {
+    companion object Companion {
+        fun parse(string: String): Time {
+            val timeStringParts = string.split(":")
+            val hour = timeStringParts[0].toInt()
+            val minute = timeStringParts[1].toInt()
 
-    fun setHourValue(value: Int) {
-        if (value in 0..24) {
-            hour = value
+            return Time(hour, minute)
         }
     }
 
-    fun setMinuteValue(value: Int) {
-        if (value in 0..59) {
-            minute = value
-        }
-    }
-
-    fun getHourValue(): Int? {
-        return hour
-    }
-
-    fun getMinuteValue(): Int? {
-        return minute
+    override fun toString(): String {
+        return String.format("%d:%d", hour, minute)
     }
 }
+

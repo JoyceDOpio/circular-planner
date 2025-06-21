@@ -1,4 +1,4 @@
-package com.example.circularplanner.ui
+package com.example.circularplanner.ui.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,11 +27,6 @@ fun ActiveTimePicker(
             title += " End"
         }
 
-//        if (isActiveTimeSet == ActiveTimeSet.NO){
-//            value = "No value"
-//        } else {
-//            value = String.format("%d:%02d", timePicker.hour, timePicker.minute)
-//        }
         value = String.format("%d:%02d", timePicker.hour, timePicker.minute)
 
         Text (title, fontWeight = FontWeight.Bold)

@@ -5,6 +5,8 @@ plugins {
     // Kotlin serialization plugin for type safe routes and navigation arguments
     kotlin("plugin.serialization") version "2.0.21"
     alias(libs.plugins.compose.compiler)
+
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -65,6 +67,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -80,4 +83,22 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     implementation("androidx.compose.foundation:foundation:1.8.1")
+
+    //Room
+    val room_version = "2.7.1"
+    implementation("androidx.room:room-runtime:2.5.0")
+    implementation("androidx.room:room-ktx:2.5.0")
+
+    ksp("androidx.room:room-compiler:2.5.0")
+
+    // View Model
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.1")
+
+//    implementation("com.intellij:annotations:12.0") {
+//        exclude(group = "com.intellij", module = "annotations-12.0")
+//    }
+}
+
+configurations.implementation{
+    exclude(group = "com.intellij", module = "annotations")
 }

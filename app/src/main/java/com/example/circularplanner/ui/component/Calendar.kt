@@ -33,11 +33,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.wear.compose.material.ripple
-import com.example.circularplanner.ui.viewmodel.DataViewModel
+import com.example.circularplanner.ui.viewmodel.TaskDisplayUiState
 
 enum class ListDirection {
     START,
@@ -46,10 +49,14 @@ enum class ListDirection {
 
 @Composable
 fun Calendar(
-    viewModel: DataViewModel
+    uiState: TaskDisplayUiState,
+    onSetDate: (LocalDate) -> Unit
     ) {
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var selectedDateIndex by remember { mutableStateOf(0) }
+    var circledDate by remember { mutableStateOf(uiState.selectedDate) }
+    // The index of the circled date in a week
+    var circledDateIndex by remember { mutableIntStateOf(0) }
+    // The index of the week in weeks
+    var weeksIndex by remember { mutableIntStateOf(0) }
     val today = LocalDate.now()
     val formatter = DateTimeFormatter.ofPattern("d")
     var numberOfDaysPerWeek = 7
@@ -59,7 +66,6 @@ fun Calendar(
         daysOfWeek += localizedDayName
 //        daysOfWeek += simpleDateFormat.format(localizedDayName)
     }
-
     val listState = rememberLazyListState()
     val flingBehaviour = rememberSnapFlingBehavior(
         lazyListState = listState,
@@ -137,33 +143,39 @@ fun Calendar(
         }
     }
 
-    fun setInitialSelectedDateIndex () {
-        weeks[0].forEachIndexed { index, day ->
-            if (day == today) {
-                selectedDateIndex = index
+    fun setInitialCircledDateIndex () {
+        weeks.forEachIndexed { weekIndex, week ->
+            week.forEachIndexed { dayIndex, day ->
+                if (day == uiState.selectedDate) {
+                    circledDateIndex = dayIndex
+                    weeksIndex = weekIndex
+                }
             }
         }
     }
 
-    fun setSelectedDateOnScroll () {
+    fun setCircledDateOnScroll () {
         val visibleItem = listState.layoutInfo.visibleItemsInfo.firstOrNull()
         if (visibleItem != null) {
-            val date = weeks[visibleItem.index][selectedDateIndex]
-            selectedDate = date
-            viewModel.setDate(date)
+            val date = weeks[visibleItem.index][circledDateIndex]
+            circledDate = date
         }
     }
 
-    fun setSelectedDateOnClick (index: Int, date: LocalDate) {
-        selectedDateIndex = index
-        selectedDate = date
-        viewModel.setDate(date)
+    fun setCircledDateOnClick (index: Int, date: LocalDate) {
+        circledDateIndex = index
+        circledDate = date
+
+        onSetDate(date)
     }
 
-    setInitialSelectedDateIndex()
+    setInitialCircledDateIndex()
 
+    // TODO: Scroll to the selected date
+
+    // Set the new circled date when user scrolls
     LaunchedEffect(key1 = listState.firstVisibleItemIndex) {
-        setSelectedDateOnScroll()
+        setCircledDateOnScroll()
     }
 
     // Load more if scrolled to end or start of the list
@@ -173,6 +185,26 @@ fun Calendar(
     }
 
     Column () {
+        // Circled date
+        Row (
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text (
+                text = circledDate.format(DateTimeFormatter.ofPattern("d. MMMM yyyy")),
+                textAlign = TextAlign.Center
+            )
+        }
+
+        HorizontalDivider(
+            modifier = Modifier
+                .padding(horizontal = 10.dp)
+                .fillMaxWidth(),
+            thickness = 1.dp,
+        )
+
         // Weekday names
         Row (
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -226,12 +258,12 @@ fun Calendar(
                                 .aspectRatio(1f)
                                 .padding(5.dp)
                                 .conditional(week[iteration] == today, todayModifier)
-                                .conditional(iteration == selectedDateIndex, selectedDayModifier)
+                                .conditional(iteration == circledDateIndex, selectedDayModifier)
                                 .clickable(
                                     interactionSource = remember { MutableInteractionSource() },
                                     indication = ripple(bounded = true),
                                     onClick = {
-                                        setSelectedDateOnClick(
+                                        setCircledDateOnClick(
                                             index = iteration,
                                             date = week[iteration]
                                         )

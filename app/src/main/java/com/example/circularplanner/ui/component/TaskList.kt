@@ -10,22 +10,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.circularplanner.data.Task
-import java.util.UUID
+import com.example.circularplanner.ui.viewmodel.TaskDisplayUiState
 
 @Composable
 fun TaskList(
-//    viewModel: DataViewModel,
+    uiState: TaskDisplayUiState,
     onNavigateToTaskInfo: (String?) -> Unit,
-    tasks: List<Task>,
-    getTask: (UUID) -> Task?,
     removeTask: (Task) -> Unit
 ) {
+    // Sorts tasks according to their start time
+    val TaskSortingComparator = Comparator <Task> { first, second ->
+        if (first.startTime.hour < second.startTime.hour) {
+            -1
+        } else if (first.startTime.hour > second.startTime.hour) {
+            1
+        } else {
+            if (first.startTime.minute < second.startTime.minute) {
+                -1
+            } else if (first.startTime.minute > second.startTime.minute) {
+                1
+            } else {
+                0
+            }
+        }
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ) {
         items(
-            items = tasks,
+            items = uiState.dayDetails.tasks.sortedWith(TaskSortingComparator),
             key = { it.id }
         ) { task ->
             SwipeToDeleteContainer(
@@ -39,11 +54,8 @@ fun TaskList(
                 onDelete = removeTask
             ){
                 task -> TaskListItem(
-//                    viewModel = viewModel,
                     task = task,
                     onNavigateToTaskInfo = onNavigateToTaskInfo,
-//                    getTask = getTask,
-                    removeTask = removeTask,
                 )
             }
         }

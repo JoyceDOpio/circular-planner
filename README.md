@@ -12,3 +12,5 @@ Double tap on a task (on the task dial) activates the task edit mode: the task a
 
 A long press on the task dial followed by a drag along the task dial designates the start and end time for a new task. Once the drag ends, a task creation screen opens with the start time set to the time where the long press occurred, and the end time set to the time where the drag ended.
 
+The active time start and active time end are within the same day. There is no possibility to start the active time on one day and end it on the next day.
+

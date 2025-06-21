@@ -1,8 +1,10 @@
-package com.example.circularplanner.ui.screen
+package com.example.circularplanner.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,33 +27,42 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.circularplanner.R
-import com.example.circularplanner.ui.ActiveTime
-import com.example.circularplanner.ui.ActiveTimePicker
-import com.example.circularplanner.ui.component.TimePickerDialog
 import com.example.circularplanner.data.Time
-import com.example.circularplanner.ui.state.TaskState
+import com.example.circularplanner.ui.viewmodel.DayDetails
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActiveTimeSetUpScreen (
-//    viewModel: DataViewModel = viewModel(),
-    taskState: TaskState,
+fun ActiveTimeSetUp (
     modifier: Modifier = Modifier,
-    onNavigateToTaskDisplay: () -> Unit
+    uiState: DayDetails,
+    onBack: () -> Unit,
+    onClickSaveActiveTime: () -> Unit,
+    setActiveTimeStart: (Time) -> Unit,
+    setActiveTimeEnd: (Time) -> Unit
 ){
-    var startActiveTimePickerState = rememberTimePickerState()
-    var endActiveTimePickerState = rememberTimePickerState()
     var showTimePicker by remember { mutableStateOf(false) }
     var showStartActiveTimePicker by remember { mutableStateOf(false) }
+    var activeTimeStart by remember { mutableStateOf(uiState.activeTimeStart) }
+    var activeTimeEnd by remember { mutableStateOf(uiState.activeTimeEnd) }
+    var isActiveTimeValid by remember { mutableStateOf(false) }
+    val startActiveTimePickerState = rememberTimePickerState(
+        activeTimeStart.hour,
+        activeTimeStart.minute
+    )
+    val endActiveTimePickerState = rememberTimePickerState(
+        activeTimeEnd.hour,
+        activeTimeEnd.minute
+    )
+    val cancelButtonText = "Cancel"
+    val okButtonText = "Set Active Time"
 
-    fun closeTimePicker() {
-        showTimePicker = false
-        showStartActiveTimePicker = false
-    }
+    fun validateActiveTime(): Boolean {
+        val start = activeTimeStart
+        val end = activeTimeEnd
 
-    fun validateActiveTime(start: Time, end: Time): Boolean {
         if (start.hour == 0 && start.minute == 0) {
             if (end.hour >= start.hour || end.minute >= start.minute) {
                 return true
@@ -69,25 +80,43 @@ fun ActiveTimeSetUpScreen (
         return false
     }
 
+    fun onCancelCloseTimePicker() {
+        showTimePicker = false
+        showStartActiveTimePicker = false
+    }
+
+    fun onSaveCloseTimePicker() {
+        if (showStartActiveTimePicker) {
+            setActiveTimeStart(Time(startActiveTimePickerState.hour, startActiveTimePickerState.minute))
+        } else {
+            setActiveTimeEnd(Time(endActiveTimePickerState.hour, endActiveTimePickerState.minute))
+        }
+        isActiveTimeValid = validateActiveTime()
+
+        showTimePicker = false
+        showStartActiveTimePicker = false
+    }
+
     Column(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth(0.7f)
+            .fillMaxHeight()
             .padding(10.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ){
+        Spacer(Modifier.weight(1f, true))
+
         Column(
             modifier = modifier
-//                .fillMaxSize()
+                .weight(3f)
                 .padding(vertical = 20.dp),
             verticalArrangement = Arrangement.SpaceAround,
-//            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(5.dp),
-//                .weight(1f),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -133,7 +162,6 @@ fun ActiveTimeSetUpScreen (
                 modifier = modifier
                     .fillMaxWidth()
                     .padding(5.dp),
-//                .weight(1f),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -176,54 +204,63 @@ fun ActiveTimeSetUpScreen (
 
         Row(
             modifier = modifier
+                .weight(1f)
                 .fillMaxWidth()
                 .paddingFromBaseline(top = 5.dp),
-//                .weight(1f),
-            horizontalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
 
         ) {
             Button(
-                onClick = {
-                    val startTime = Time(startActiveTimePickerState.hour, startActiveTimePickerState.minute)
-                    val endTime = Time(endActiveTimePickerState.hour, endActiveTimePickerState.minute)
-                    val isActiveTimeValid = validateActiveTime(startTime, endTime)
+                onClick = onBack,
+                modifier = Modifier
+                    .weight(3f)
+                    .fillMaxHeight(),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(text = cancelButtonText)
+            }
 
-                    if(isActiveTimeValid) {
-    //                    viewModel.setActiveTime(startTime, endTime)
-                        taskState.activeTimeStart = startTime
-                        taskState.activeTimeEnd = endTime
-                        onNavigateToTaskDisplay()
-                    } else {
-                        //TODO: Display notification about invalid input
-                    }
+            Spacer(Modifier.weight(0.2f, true))
+
+            Button(
+                //TODO: Display notification about invalid input
+                onClick = {
+                    onClickSaveActiveTime()
+                    onBack()
                 },
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .weight(4f)
+                    .fillMaxHeight(),
+                enabled = isActiveTimeValid,
                 shape = RoundedCornerShape(8.dp)
-//                shape = Shapes(RectangleShape.createOutline())
             ) {
-                Text(text = "Calculate active time")
+                Text(
+                    text = okButtonText,
+                    textAlign = TextAlign.Center
+                )
             }
         }
+
+        Spacer(Modifier.weight(2f, true))
     }
 
     if (showTimePicker) {
         TimePickerDialog(
             onDismissRequest = {
-                closeTimePicker()
+                onCancelCloseTimePicker()
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        closeTimePicker()
+                        onSaveCloseTimePicker()
                     }
                 ) { Text("OK") }
             },
             dismissButton = {
                 TextButton(
                     onClick = {
-                        closeTimePicker()
+                        onCancelCloseTimePicker()
                     }
                 ) { Text("Cancel") }
             }
